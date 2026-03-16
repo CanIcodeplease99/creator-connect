@@ -114,15 +114,13 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
 
         {post.media && (
           <div className="relative">
-            <img src={post.media} alt="" className={`w-full object-cover ${post.isLocked ? "blur-locked" : ""}`} />
-            {post.isLocked && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/20">
-                <Lock size={32} className="text-primary-foreground mb-3" />
-                <span className="text-primary-foreground font-semibold text-sm mb-2">
-                  {post.lockType === "ppv" ? `Unlock for ${post.ppvPrice}` : `Subscribe to ${post.creator.name}`}
-                </span>
+            <img src={post.media} alt="" className={`w-full object-cover ${post.mediaType === "video" ? "blur-locked" : ""}`} />
+            {post.mediaType === "video" && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30">
+                <Play size={48} className="text-primary-foreground mb-3" fill="currentColor" />
+                <span className="text-primary-foreground font-semibold mb-2">Subscribe to watch</span>
                 <button className="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all duration-200">
-                  {post.lockType === "ppv" ? `Unlock ${post.ppvPrice}` : "Sign up to unlock"}
+                  Sign up to unlock
                 </button>
               </div>
             )}
