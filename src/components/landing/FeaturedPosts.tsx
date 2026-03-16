@@ -162,7 +162,7 @@ const FeaturedPosts = () => {
         <h2 className="text-3xl font-bold text-foreground">Latest featured posts</h2>
       </motion.div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {visiblePosts.map((post) => (
           <PostCardPublic key={post.id} post={post} onPreview={setPreviewPost} />
         ))}
