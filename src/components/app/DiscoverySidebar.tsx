@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BadgeCheck, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, MoreHorizontal, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { creators, type Creator } from "@/data/mockData";
 import { useNavigate } from "react-router-dom";
@@ -12,31 +12,44 @@ const CreatorSuggestionCard = ({ creator }: { creator: Creator }) => {
   return (
     <div
       onClick={() => navigate(`/creator/${creator.handle.replace("@", "")}`)}
-      className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-[1.02] hover:shadow-lift transition-all duration-250"
+      className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-lift transition-all duration-250"
     >
-      <img src={creator.cover} alt={creator.name} className="w-full h-36 object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent group-hover:from-foreground/80 transition-all duration-250" />
+      {/* Cover image */}
+      <img src={creator.cover} alt={creator.name} className="w-full h-[140px] object-cover" />
 
       {/* Price chip */}
-      <div className="absolute top-2 left-2">
-        <span className="text-[10px] px-2 py-0.5 rounded-full bg-card/90 text-foreground font-medium">
-          {creator.promoDiscount ? `Promo ${creator.promoDiscount}` : `From ${creator.price}`}
+      <div className="absolute top-3 left-3">
+        <span className="text-xs px-3 py-1 rounded-full bg-primary text-primary-foreground font-semibold shadow-md">
+          {creator.promoDiscount ? `Promo ${creator.promoDiscount}` : creator.price === "R59/mo" || creator.price === "R79/mo" ? "Free" : `From ${creator.price}`}
         </span>
       </div>
 
-      {/* Bottom info */}
-      <div className="absolute bottom-0 left-0 right-0 p-3">
-        <div className="flex items-center gap-1.5">
-          <span className="text-primary-foreground font-semibold text-sm">{creator.name}</span>
-          {creator.verified && <BadgeCheck size={12} className="text-primary-foreground" />}
+      {/* 3-dot menu */}
+      <div className="absolute top-3 right-3">
+        <button className="w-7 h-7 rounded-full bg-card/60 backdrop-blur-sm flex items-center justify-center text-foreground/70 hover:bg-card/90 transition-colors">
+          <MoreHorizontal size={16} />
+        </button>
+      </div>
+
+      {/* Avatar overlapping cover and info */}
+      <div className="relative bg-card px-4 pb-4 pt-0">
+        {/* Avatar positioned to overlap */}
+        <div className="absolute -top-8 left-4">
+          <img
+            src={creator.avatar}
+            alt={creator.name}
+            className="w-16 h-16 rounded-full border-[3px] border-card bg-muted object-cover"
+          />
         </div>
-        <div className="flex items-center gap-2 text-primary-foreground/80 text-xs">
-          <span>{creator.handle}</span>
-          <span className="px-1.5 py-0.5 rounded-full bg-primary-foreground/20 text-[10px]">{creator.category}</span>
+
+        {/* Creator info - offset right of avatar */}
+        <div className="pl-[76px] pt-1">
+          <div className="flex items-center gap-1.5">
+            <span className="text-foreground font-bold text-sm truncate">{creator.name}</span>
+            {creator.verified && <BadgeCheck size={14} className="text-primary shrink-0" />}
+          </div>
+          <span className="text-muted-foreground text-xs">{creator.handle}</span>
         </div>
-        <p className="text-primary-foreground/70 text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 truncate">
-          {creator.tagline} · {(creator.subscribers / 1000).toFixed(1)}K fans {creator.isOnline ? "· Online now" : ""}
-        </p>
       </div>
     </div>
   );
@@ -44,7 +57,7 @@ const CreatorSuggestionCard = ({ creator }: { creator: Creator }) => {
 
 const DiscoverySidebar = () => {
   const [startIdx, setStartIdx] = useState(0);
-  const visible = suggestedCreators.slice(startIdx, startIdx + 2);
+  const maxIdx = suggestedCreators.length - 1;
   const navigate = useNavigate();
 
   return (
@@ -52,21 +65,42 @@ const DiscoverySidebar = () => {
       {/* Suggestions */}
       <div className="bg-card rounded-2xl shadow-card p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-foreground text-sm">Suggestions</h3>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setStartIdx(Math.max(0, startIdx - 1))} className="p-1 rounded-full hover:bg-secondary transition-colors">
+          <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Suggestions</h3>
+          <div className="flex items-center gap-1.5">
+            <button className="p-1.5 rounded-full hover:bg-secondary transition-colors">
+              <SlidersHorizontal size={16} className="text-muted-foreground" />
+            </button>
+            <button className="p-1.5 rounded-full hover:bg-secondary transition-colors">
+              <RefreshCw size={14} className="text-muted-foreground" />
+            </button>
+            <button onClick={() => setStartIdx(Math.max(0, startIdx - 1))} className="p-1.5 rounded-full hover:bg-secondary transition-colors">
               <ChevronLeft size={16} className="text-muted-foreground" />
             </button>
-            <button onClick={() => setStartIdx(Math.min(suggestedCreators.length - 2, startIdx + 1))} className="p-1 rounded-full hover:bg-secondary transition-colors">
+            <button onClick={() => setStartIdx(Math.min(maxIdx, startIdx + 1))} className="p-1.5 rounded-full hover:bg-secondary transition-colors">
               <ChevronRight size={16} className="text-muted-foreground" />
-            </button>
-            <button className="p-1 rounded-full hover:bg-secondary transition-colors">
-              <RefreshCw size={14} className="text-muted-foreground" />
             </button>
           </div>
         </div>
+
         <div className="space-y-3">
-          {visible.map((c) => <CreatorSuggestionCard key={c.id} creator={c} />)}
+          {suggestedCreators.slice(startIdx, startIdx + 3).map((c) => (
+            <CreatorSuggestionCard key={c.id} creator={c} />
+          ))}
+        </div>
+
+        {/* Pagination dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-4">
+          {suggestedCreators.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setStartIdx(i)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i >= startIdx && i < startIdx + 3
+                  ? "bg-primary"
+                  : "bg-border"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
