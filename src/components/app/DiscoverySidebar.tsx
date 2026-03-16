@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BadgeCheck, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, MoreHorizontal, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { creators, type Creator } from "@/data/mockData";
 import { useNavigate } from "react-router-dom";
