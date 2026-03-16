@@ -72,7 +72,7 @@ export const posts: Post[] = [
   },
   {
     id: "p3", creator: creators[2], content: "Watch me paint this sunset landscape in real-time. 4 hours condensed into 10 minutes ✨🎨", media: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
-    mediaType: "image", isLocked: true, lockType: "ppv", ppvPrice: "R150", likes: 312, comments: 67, reposts: 23, timestamp: "6h ago", hashtags: ["art", "timelapse", "painting"],
+    mediaType: "video", isLocked: true, lockType: "ppv", ppvPrice: "R150", likes: 312, comments: 67, reposts: 23, timestamp: "6h ago", hashtags: ["art", "timelapse", "painting"],
   },
   {
     id: "p4", creator: creators[4], content: "Summer collection preview! These pieces won't be available anywhere else. Exclusive to my subscribers 👗", media: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80",
@@ -84,7 +84,19 @@ export const posts: Post[] = [
   },
   {
     id: "p6", creator: creators[5], content: "Behind the scenes of my latest collaboration. This beat is going to be massive 🎶", media: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80",
-    mediaType: "image", isLocked: true, lockType: "ppv", ppvPrice: "R120", likes: 678, comments: 134, reposts: 45, timestamp: "1d ago", hashtags: ["music", "collab", "bts"],
+    mediaType: "video", isLocked: true, lockType: "ppv", ppvPrice: "R120", likes: 678, comments: 134, reposts: 45, timestamp: "1d ago", hashtags: ["music", "collab", "bts"],
+  },
+  {
+    id: "p7", creator: creators[0], content: "Full live performance from last night's show in Cape Town. You don't want to miss this 🎤🔥", media: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+    mediaType: "video", isLocked: true, lockType: "sub", likes: 1023, comments: 201, reposts: 89, timestamp: "1d ago", hashtags: ["liveperformance", "capetown"],
+  },
+  {
+    id: "p8", creator: creators[1], content: "Morning mobility routine — follow along with me! This 15-min flow will change your day 🧘‍♂️", media: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
+    mediaType: "video", isLocked: true, lockType: "ppv", ppvPrice: "R80", likes: 389, comments: 74, reposts: 31, timestamp: "2d ago", hashtags: ["mobility", "wellness", "followalong"],
+  },
+  {
+    id: "p9", creator: creators[4], content: "Exclusive runway footage from my latest fashion show. The crowd went wild! 👠✨", media: "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&q=80",
+    mediaType: "video", isLocked: true, lockType: "sub", likes: 1456, comments: 312, reposts: 145, timestamp: "3d ago", hashtags: ["runway", "fashionshow", "exclusive"],
   },
 ];
 
