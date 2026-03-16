@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import heroBg from "@/assets/hero-bg.jpg";
 import LoginCard from "./LoginCard";
-import CreatorPreviewCards from "./CreatorPreviewCards";
 
 interface HeroSectionProps {
   onLogin: () => void;
