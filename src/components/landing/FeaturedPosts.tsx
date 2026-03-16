@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Heart, MessageCircle, Repeat2, BadgeCheck, X } from "lucide-react";
+import { Lock, Heart, MessageCircle, Repeat2, BadgeCheck, X, Play } from "lucide-react";
 import { posts, type Post } from "@/data/mockData";
 
 interface PostCardPublicProps {
@@ -9,6 +9,8 @@ interface PostCardPublicProps {
 }
 
 const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
+  const isVideo = post.mediaType === "video";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -18,53 +20,60 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
       className="bg-card rounded-2xl shadow-card overflow-hidden hover:shadow-lift transition-shadow duration-250 cursor-pointer"
       onClick={() => onPreview(post)}
     >
-      <div className="flex flex-col sm:flex-row">
-        {/* Media */}
-        {post.media && (
-          <div className="relative sm:w-72 sm:min-w-[18rem] aspect-[4/3] sm:aspect-auto overflow-hidden">
-            <img src={post.media} alt="" className={`w-full h-full object-cover ${post.isLocked ? "blur-locked" : ""}`} />
-            {post.isLocked && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/20">
-                <Lock size={28} className="text-primary-foreground mb-2" />
-                <span className="text-primary-foreground font-semibold text-sm">
-                  {post.lockType === "ppv" ? `Unlock for ${post.ppvPrice}` : "Sign up to unlock"}
-                </span>
-              </div>
-            )}
+      {/* Creator header */}
+      <div className="flex items-center gap-3 p-5 pb-3">
+        <img src={post.creator.avatar} alt={post.creator.name} className="w-12 h-12 rounded-full bg-muted" />
+        <div className="flex-1">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-foreground">{post.creator.name}</span>
+            {post.creator.verified && <BadgeCheck size={16} className="text-primary" />}
           </div>
-        )}
-
-        {/* Content */}
-        <div className="p-4 flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <img src={post.creator.avatar} alt={post.creator.name} className="w-10 h-10 rounded-full bg-muted" />
-              <div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-foreground text-sm">{post.creator.name}</span>
-                  {post.creator.verified && <BadgeCheck size={14} className="text-primary" />}
-                </div>
-                <p className="text-muted-foreground text-xs">{post.creator.handle} · {post.timestamp}</p>
-              </div>
-              <div className="ml-auto flex gap-1.5">
-                {post.lockType === "sub" && <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">Sub-only</span>}
-                {post.lockType === "ppv" && <span className="text-[10px] px-2 py-0.5 rounded-full bg-accent/10 text-accent font-medium">PPV {post.ppvPrice}</span>}
-                {!post.isLocked && <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">Free</span>}
-              </div>
-            </div>
-
-            <p className="text-foreground text-sm mb-2">{post.content}</p>
-            {post.hashtags && (
-              <p className="text-primary text-xs mb-3">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-5 text-muted-foreground text-sm">
-            <span className="flex items-center gap-1"><Heart size={16} /> {post.likes}</span>
-            <span className="flex items-center gap-1"><MessageCircle size={16} /> {post.comments}</span>
-            <span className="flex items-center gap-1"><Repeat2 size={16} /> {post.reposts}</span>
-          </div>
+          <p className="text-muted-foreground text-sm">{post.creator.handle} · {post.timestamp}</p>
         </div>
+        <div className="flex gap-1.5">
+          {post.lockType === "sub" && <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">Sub-only</span>}
+          {post.lockType === "ppv" && <span className="text-xs px-2.5 py-1 rounded-full bg-accent/10 text-accent font-medium">PPV {post.ppvPrice}</span>}
+          {!post.isLocked && <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">Free</span>}
+        </div>
+      </div>
+
+      {/* Caption - always visible */}
+      <div className="px-5 pb-3">
+        <p className="text-foreground text-[15px] leading-relaxed mb-2">{post.content}</p>
+        {post.hashtags && (
+          <p className="text-primary text-sm">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
+        )}
+      </div>
+
+      {/* Media - images shown, videos locked */}
+      {post.media && (
+        <div className="relative">
+          <img
+            src={post.media}
+            alt=""
+            className={`w-full aspect-[4/3] object-cover ${isVideo ? "blur-locked" : ""}`}
+          />
+          {isVideo && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30">
+              <Play size={48} className="text-primary-foreground mb-3" fill="currentColor" />
+              <span className="text-primary-foreground font-semibold">Subscribe to watch</span>
+            </div>
+          )}
+          {!isVideo && post.isLocked && (
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-foreground/60 to-transparent">
+              <span className="text-primary-foreground text-sm font-medium">
+                {post.lockType === "ppv" ? `Unlock full post for ${post.ppvPrice}` : "Sign up to see more from this creator"}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center gap-6 px-5 py-4 text-muted-foreground">
+        <span className="flex items-center gap-1.5 text-sm"><Heart size={18} /> {post.likes}</span>
+        <span className="flex items-center gap-1.5 text-sm"><MessageCircle size={18} /> {post.comments}</span>
+        <span className="flex items-center gap-1.5 text-sm"><Repeat2 size={18} /> {post.reposts}</span>
       </div>
     </motion.div>
   );
@@ -105,15 +114,13 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
 
         {post.media && (
           <div className="relative">
-            <img src={post.media} alt="" className={`w-full object-cover ${post.isLocked ? "blur-locked" : ""}`} />
-            {post.isLocked && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/20">
-                <Lock size={32} className="text-primary-foreground mb-3" />
-                <span className="text-primary-foreground font-semibold text-sm mb-2">
-                  {post.lockType === "ppv" ? `Unlock for ${post.ppvPrice}` : `Subscribe to ${post.creator.name}`}
-                </span>
+            <img src={post.media} alt="" className={`w-full object-cover ${post.mediaType === "video" ? "blur-locked" : ""}`} />
+            {post.mediaType === "video" && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30">
+                <Play size={48} className="text-primary-foreground mb-3" fill="currentColor" />
+                <span className="text-primary-foreground font-semibold mb-2">Subscribe to watch</span>
                 <button className="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all duration-200">
-                  {post.lockType === "ppv" ? `Unlock ${post.ppvPrice}` : "Sign up to unlock"}
+                  Sign up to unlock
                 </button>
               </div>
             )}
@@ -142,7 +149,7 @@ const FeaturedPosts = () => {
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <section className="py-20 px-6 max-w-3xl mx-auto">
+    <section className="py-20 px-6 max-w-2xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -153,7 +160,7 @@ const FeaturedPosts = () => {
         <h2 className="text-3xl font-bold text-foreground">Latest featured posts</h2>
       </motion.div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-8">
         {visiblePosts.map((post) => (
           <PostCardPublic key={post.id} post={post} onPreview={setPreviewPost} />
         ))}

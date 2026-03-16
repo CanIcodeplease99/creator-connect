@@ -54,17 +54,10 @@ const HeroSection = ({ onLogin }: HeroSectionProps) => {
             </button>
           </motion.div>
 
-          {/* Creator cards (hidden on mobile, shown on md+) */}
-          <div className="hidden md:block lg:hidden">
-            <CreatorPreviewCards />
-          </div>
         </div>
 
         {/* Right */}
         <div className="flex flex-col items-center lg:items-end gap-8">
-          <div className="hidden lg:block w-full max-w-sm">
-            <CreatorPreviewCards />
-          </div>
           <LoginCard onLogin={onLogin} />
         </div>
       </div>
