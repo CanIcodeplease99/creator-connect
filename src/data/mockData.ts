@@ -32,31 +32,36 @@ export interface Post {
   hashtags?: string[];
 }
 
-const avatarBase = "https://api.dicebear.com/7.x/avataaars/svg?seed=";
+import avatarAmara from "@/assets/avatars/amara.jpg";
+import avatarLiam from "@/assets/avatars/liam.jpg";
+import avatarSofia from "@/assets/avatars/sofia.jpg";
+import avatarThabo from "@/assets/avatars/thabo.jpg";
+import avatarZara from "@/assets/avatars/zara.jpg";
+import avatarJay from "@/assets/avatars/jay.jpg";
 
 export const creators: Creator[] = [
   {
-    id: "1", name: "Amara Okafor", handle: "@amara_creates", avatar: `${avatarBase}amara`, cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80",
+    id: "1", name: "Amara Okafor", handle: "@amara_creates", avatar: avatarAmara, cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80",
     verified: true, category: "Music", tagline: "Daily BTS drops & custom DMs", price: "R99/mo", subscribers: 12400, totalPosts: 342, totalLikes: 89200, isOnline: true,
   },
   {
-    id: "2", name: "Liam Chen", handle: "@liamfit", avatar: `${avatarBase}liam`, cover: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
+    id: "2", name: "Liam Chen", handle: "@liamfit", avatar: avatarLiam, cover: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80",
     verified: true, category: "Fitness", tagline: "Workout plans & nutrition tips", price: "R149/mo", subscribers: 8700, totalPosts: 215, totalLikes: 45300, promoDiscount: "20% off",
   },
   {
-    id: "3", name: "Sofia Reyes", handle: "@sofiaart", avatar: `${avatarBase}sofia`, cover: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
+    id: "3", name: "Sofia Reyes", handle: "@sofiaart", avatar: avatarSofia, cover: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80",
     verified: true, category: "Art", tagline: "Timelapse paintings & commissions", price: "R79/mo", subscribers: 5200, totalPosts: 178, totalLikes: 32100, isLive: true,
   },
   {
-    id: "4", name: "Thabo Ndlovu", handle: "@thabocooks", avatar: `${avatarBase}thabo`, cover: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80",
+    id: "4", name: "Thabo Ndlovu", handle: "@thabocooks", avatar: avatarThabo, cover: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80",
     verified: false, category: "Cooking", tagline: "Traditional recipes made modern", price: "R59/mo", subscribers: 3100, totalPosts: 96, totalLikes: 15400,
   },
   {
-    id: "5", name: "Zara Kim", handle: "@zarastyle", avatar: `${avatarBase}zara`, cover: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
+    id: "5", name: "Zara Kim", handle: "@zarastyle", avatar: avatarZara, cover: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
     verified: true, category: "Fashion", tagline: "Exclusive lookbooks & styling tips", price: "R129/mo", subscribers: 19800, totalPosts: 410, totalLikes: 120500, isOnline: true,
   },
   {
-    id: "6", name: "Jay Moodley", handle: "@jaymood", avatar: `${avatarBase}jay`, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+    id: "6", name: "Jay Moodley", handle: "@jaymood", avatar: avatarJay, cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
     verified: true, category: "Music", tagline: "Beats, collabs & studio sessions", price: "R89/mo", subscribers: 7600, totalPosts: 201, totalLikes: 56700,
   },
 ];
