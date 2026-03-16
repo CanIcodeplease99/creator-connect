@@ -57,7 +57,7 @@ const CreatorSuggestionCard = ({ creator }: { creator: Creator }) => {
 
 const DiscoverySidebar = () => {
   const [startIdx, setStartIdx] = useState(0);
-  const visible = suggestedCreators.slice(startIdx, startIdx + 2);
+  const maxIdx = suggestedCreators.length - 1;
   const navigate = useNavigate();
 
   return (
@@ -65,21 +65,42 @@ const DiscoverySidebar = () => {
       {/* Suggestions */}
       <div className="bg-card rounded-2xl shadow-card p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-foreground text-sm">Suggestions</h3>
-          <div className="flex items-center gap-1">
-            <button onClick={() => setStartIdx(Math.max(0, startIdx - 1))} className="p-1 rounded-full hover:bg-secondary transition-colors">
+          <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">Suggestions</h3>
+          <div className="flex items-center gap-1.5">
+            <button className="p-1.5 rounded-full hover:bg-secondary transition-colors">
+              <SlidersHorizontal size={16} className="text-muted-foreground" />
+            </button>
+            <button className="p-1.5 rounded-full hover:bg-secondary transition-colors">
+              <RefreshCw size={14} className="text-muted-foreground" />
+            </button>
+            <button onClick={() => setStartIdx(Math.max(0, startIdx - 1))} className="p-1.5 rounded-full hover:bg-secondary transition-colors">
               <ChevronLeft size={16} className="text-muted-foreground" />
             </button>
-            <button onClick={() => setStartIdx(Math.min(suggestedCreators.length - 2, startIdx + 1))} className="p-1 rounded-full hover:bg-secondary transition-colors">
+            <button onClick={() => setStartIdx(Math.min(maxIdx, startIdx + 1))} className="p-1.5 rounded-full hover:bg-secondary transition-colors">
               <ChevronRight size={16} className="text-muted-foreground" />
-            </button>
-            <button className="p-1 rounded-full hover:bg-secondary transition-colors">
-              <RefreshCw size={14} className="text-muted-foreground" />
             </button>
           </div>
         </div>
+
         <div className="space-y-3">
-          {visible.map((c) => <CreatorSuggestionCard key={c.id} creator={c} />)}
+          {suggestedCreators.slice(startIdx, startIdx + 3).map((c) => (
+            <CreatorSuggestionCard key={c.id} creator={c} />
+          ))}
+        </div>
+
+        {/* Pagination dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-4">
+          {suggestedCreators.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setStartIdx(i)}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                i >= startIdx && i < startIdx + 3
+                  ? "bg-primary"
+                  : "bg-border"
+              }`}
+            />
+          ))}
         </div>
       </div>
 
