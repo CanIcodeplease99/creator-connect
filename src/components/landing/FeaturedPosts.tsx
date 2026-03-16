@@ -151,7 +151,7 @@ const FeaturedPosts = () => {
   const visiblePosts = posts.slice(0, visibleCount);
 
   return (
-    <section className="py-20 px-6 max-w-3xl mx-auto">
+    <section className="py-20 px-6 max-w-2xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
