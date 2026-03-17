@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Repeat2, BadgeCheck, X, Play, Crown } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, BadgeCheck, X, Play, Crown, Lock } from "lucide-react";
 import { posts, type Post } from "@/data/mockData";
+import SignUpModal from "@/components/app/SignUpModal";
 
 interface PostCardPublicProps {
   post: Post;
   onPreview: (post: Post) => void;
+  onSubscribe: (post: Post) => void;
 }
 
-const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
+const PostCardPublic = ({ post, onPreview, onSubscribe }: PostCardPublicProps) => {
   const isVideo = post.mediaType === "video";
 
   return (
@@ -18,61 +20,69 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
       viewport={{ once: true }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="bg-card rounded-2xl shadow-card overflow-hidden hover:shadow-lift transition-shadow duration-250 cursor-pointer"
-      onClick={() => onPreview(post)}
+      onClick={() => !isVideo && onPreview(post)}
     >
       {/* Creator header */}
-      <div className="flex items-center gap-3 p-5 pb-3">
-        <img src={post.creator.avatar} alt={post.creator.name} className="w-12 h-12 rounded-full bg-muted" />
-        <div className="flex-1">
+      <div className="flex items-center gap-3 p-4 sm:p-5 pb-3">
+        <img src={post.creator.avatar} alt={post.creator.name} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted" />
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-foreground">{post.creator.name}</span>
-            {post.creator.verified && <BadgeCheck size={16} className="text-primary" />}
+            <span className="font-bold text-foreground text-sm sm:text-base truncate">{post.creator.name}</span>
+            {post.creator.verified && <BadgeCheck size={16} className="text-primary shrink-0" />}
           </div>
-          <p className="text-muted-foreground text-sm">{post.creator.handle} · {post.timestamp}</p>
+          <p className="text-muted-foreground text-xs sm:text-sm truncate">{post.creator.handle} · {post.timestamp}</p>
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex gap-1.5 shrink-0">
           {isVideo && (
-            <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+            <span className="text-xs px-2 sm:px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
               <Play size={10} fill="currentColor" /> Video
             </span>
           )}
-          <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">Free preview</span>
+          {!isVideo && (
+            <span className="text-xs px-2 sm:px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">Free preview</span>
+          )}
         </div>
       </div>
 
       {/* Caption */}
-      <div className="px-5 pb-3">
-        <p className="text-foreground text-[15px] leading-relaxed mb-2">{post.content}</p>
+      <div className="px-4 sm:px-5 pb-3">
+        <p className="text-foreground text-sm sm:text-[15px] leading-relaxed mb-2">{post.content}</p>
         {post.hashtags && (
-          <p className="text-primary text-sm">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
+          <p className="text-primary text-xs sm:text-sm">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
         )}
       </div>
 
-      {/* Media — all visible, videos show 15s preview badge */}
+      {/* Media */}
       {post.media && (
         <div className="relative">
-          <img src={post.media} alt="" className="w-full aspect-[4/3] object-cover" />
-          {isVideo && (
-            <div className="absolute inset-0 flex items-center justify-center bg-foreground/10">
-              <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lift">
-                <Play size={24} className="text-primary-foreground ml-0.5" fill="currentColor" />
+          {isVideo ? (
+            /* Video: show blurred/locked preview — must sign up */
+            <>
+              <img src={post.media} alt="" className="w-full aspect-[4/3] object-cover blur-locked" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/40 backdrop-blur-sm px-4">
+                <Lock size={28} className="text-primary-foreground mb-2" />
+                <p className="text-primary-foreground font-bold text-base sm:text-lg mb-1 text-center">Video content</p>
+                <p className="text-primary-foreground/80 text-xs sm:text-sm mb-3 text-center">Sign up to access video previews</p>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSubscribe(post); }}
+                  className="px-5 sm:px-6 py-2.5 rounded-xl gradient-promo text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 shadow-lift"
+                >
+                  Sign up free to watch
+                </button>
               </div>
-              <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-                15s free preview
-              </div>
-              {post.videoDuration && (
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-                  {Math.floor(post.videoDuration / 60)}:{String(post.videoDuration % 60).padStart(2, "0")}
-                </div>
-              )}
-            </div>
+            </>
+          ) : (
+            <img src={post.media} alt="" className="w-full aspect-[4/3] object-cover" />
           )}
         </div>
       )}
 
       {/* Subscribe CTA */}
-      <div className="px-5 py-3">
-        <div className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-[hsl(280,80%,55%)] text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
+      <div className="px-4 sm:px-5 py-3">
+        <button
+          onClick={(e) => { e.stopPropagation(); onSubscribe(post); }}
+          className="w-full py-2.5 px-4 rounded-xl gradient-promo text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 shadow-lg"
+        >
           <Crown size={16} />
           Subscribe to {post.creator.name} — {post.creator.price}
           {post.creator.promoDiscount && (
@@ -80,11 +90,11 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
               {post.creator.promoDiscount}
             </span>
           )}
-        </div>
+        </button>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-6 px-5 pb-4 text-muted-foreground">
+      <div className="flex items-center gap-4 sm:gap-6 px-4 sm:px-5 pb-4 text-muted-foreground">
         <span className="flex items-center gap-1.5 text-sm"><Heart size={18} /> {post.likes}</span>
         <span className="flex items-center gap-1.5 text-sm"><MessageCircle size={18} /> {post.comments}</span>
         <span className="flex items-center gap-1.5 text-sm"><Repeat2 size={18} /> {post.reposts}</span>
@@ -93,7 +103,7 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
   );
 };
 
-const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }) => {
+const PostPreviewModal = ({ post, onClose, onSubscribe }: { post: Post; onClose: () => void; onSubscribe: () => void }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -126,16 +136,7 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
           </button>
         </div>
 
-        {post.media && (
-          <div className="relative">
-            <img src={post.media} alt="" className="w-full object-cover" />
-            {post.mediaType === "video" && (
-              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
-                15s free preview · Sign up to watch full video
-              </div>
-            )}
-          </div>
-        )}
+        {post.media && <img src={post.media} alt="" className="w-full object-cover" />}
 
         <div className="p-4">
           <p className="text-foreground text-sm mb-2">{post.content}</p>
@@ -143,8 +144,10 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
             <p className="text-primary text-xs mb-4">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
           )}
 
-          {/* Subscribe CTA in modal */}
-          <button className="w-full mb-4 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-[hsl(280,80%,55%)] text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 shadow-lg">
+          <button
+            onClick={onSubscribe}
+            className="w-full mb-4 py-3 px-4 rounded-xl gradient-promo text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 shadow-lg"
+          >
             <Crown size={16} />
             Subscribe to {post.creator.name} — {post.creator.price}
           </button>
@@ -163,31 +166,47 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
 const FeaturedPosts = () => {
   const [visibleCount, setVisibleCount] = useState(4);
   const [previewPost, setPreviewPost] = useState<Post | null>(null);
+  const [signUpModal, setSignUpModal] = useState<{
+    open: boolean;
+    creatorName?: string;
+    creatorPrice?: string;
+    creatorAvatar?: string;
+  }>({ open: false });
   const visiblePosts = posts.slice(0, visibleCount);
 
+  const handleSubscribe = (post: Post) => {
+    setSignUpModal({
+      open: true,
+      creatorName: post.creator.name,
+      creatorPrice: post.creator.price,
+      creatorAvatar: post.creator.avatar,
+    });
+    setPreviewPost(null);
+  };
+
   return (
-    <section className="py-20 px-6 max-w-2xl mx-auto">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 max-w-2xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mb-10"
+        className="mb-8 sm:mb-10"
       >
         <p className="text-primary font-medium text-sm mb-1">Handpicked for you</p>
-        <h2 className="text-3xl font-bold text-foreground">Latest featured posts</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Latest featured posts</h2>
       </motion.div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6 sm:gap-8">
         {visiblePosts.map((post) => (
-          <PostCardPublic key={post.id} post={post} onPreview={setPreviewPost} />
+          <PostCardPublic key={post.id} post={post} onPreview={setPreviewPost} onSubscribe={handleSubscribe} />
         ))}
       </div>
 
       {visibleCount < posts.length && (
-        <div className="text-center mt-10">
+        <div className="text-center mt-8 sm:mt-10">
           <button
             onClick={() => setVisibleCount((c) => Math.min(c + 4, posts.length))}
-            className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5"
+            className="px-6 sm:px-8 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5"
           >
             Load more featured posts
           </button>
@@ -195,8 +214,22 @@ const FeaturedPosts = () => {
       )}
 
       <AnimatePresence>
-        {previewPost && <PostPreviewModal post={previewPost} onClose={() => setPreviewPost(null)} />}
+        {previewPost && (
+          <PostPreviewModal
+            post={previewPost}
+            onClose={() => setPreviewPost(null)}
+            onSubscribe={() => handleSubscribe(previewPost)}
+          />
+        )}
       </AnimatePresence>
+
+      <SignUpModal
+        open={signUpModal.open}
+        onClose={() => setSignUpModal({ open: false })}
+        creatorName={signUpModal.creatorName}
+        creatorPrice={signUpModal.creatorPrice}
+        creatorAvatar={signUpModal.creatorAvatar}
+      />
     </section>
   );
 };
