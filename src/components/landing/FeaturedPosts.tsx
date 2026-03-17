@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Heart, MessageCircle, Repeat2, BadgeCheck, X, Play } from "lucide-react";
+import { Heart, MessageCircle, Repeat2, BadgeCheck, X, Play, Crown } from "lucide-react";
 import { posts, type Post } from "@/data/mockData";
 
 interface PostCardPublicProps {
@@ -31,13 +31,16 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
           <p className="text-muted-foreground text-sm">{post.creator.handle} · {post.timestamp}</p>
         </div>
         <div className="flex gap-1.5">
-          {post.lockType === "sub" && <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium">Sub-only</span>}
-          {post.lockType === "ppv" && <span className="text-xs px-2.5 py-1 rounded-full bg-accent/10 text-accent font-medium">PPV {post.ppvPrice}</span>}
-          {!post.isLocked && <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">Free</span>}
+          {isVideo && (
+            <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+              <Play size={10} fill="currentColor" /> Video
+            </span>
+          )}
+          <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">Free preview</span>
         </div>
       </div>
 
-      {/* Caption - always visible */}
+      {/* Caption */}
       <div className="px-5 pb-3">
         <p className="text-foreground text-[15px] leading-relaxed mb-2">{post.content}</p>
         {post.hashtags && (
@@ -45,32 +48,43 @@ const PostCardPublic = ({ post, onPreview }: PostCardPublicProps) => {
         )}
       </div>
 
-      {/* Media - images shown, videos locked */}
+      {/* Media — all visible, videos show 15s preview badge */}
       {post.media && (
         <div className="relative">
-          <img
-            src={post.media}
-            alt=""
-            className={`w-full aspect-[4/3] object-cover ${isVideo ? "blur-locked" : ""}`}
-          />
+          <img src={post.media} alt="" className="w-full aspect-[4/3] object-cover" />
           {isVideo && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30">
-              <Play size={48} className="text-primary-foreground mb-3" fill="currentColor" />
-              <span className="text-primary-foreground font-semibold">Subscribe to watch</span>
-            </div>
-          )}
-          {!isVideo && post.isLocked && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-foreground/60 to-transparent">
-              <span className="text-primary-foreground text-sm font-medium">
-                {post.lockType === "ppv" ? `Unlock full post for ${post.ppvPrice}` : "Sign up to see more from this creator"}
-              </span>
+            <div className="absolute inset-0 flex items-center justify-center bg-foreground/10">
+              <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lift">
+                <Play size={24} className="text-primary-foreground ml-0.5" fill="currentColor" />
+              </div>
+              <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
+                15s free preview
+              </div>
+              {post.videoDuration && (
+                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
+                  {Math.floor(post.videoDuration / 60)}:{String(post.videoDuration % 60).padStart(2, "0")}
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
+      {/* Subscribe CTA */}
+      <div className="px-5 py-3">
+        <div className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-[hsl(280,80%,55%)] text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2">
+          <Crown size={16} />
+          Subscribe to {post.creator.name} — {post.creator.price}
+          {post.creator.promoDiscount && (
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold">
+              {post.creator.promoDiscount}
+            </span>
+          )}
+        </div>
+      </div>
+
       {/* Footer */}
-      <div className="flex items-center gap-6 px-5 py-4 text-muted-foreground">
+      <div className="flex items-center gap-6 px-5 pb-4 text-muted-foreground">
         <span className="flex items-center gap-1.5 text-sm"><Heart size={18} /> {post.likes}</span>
         <span className="flex items-center gap-1.5 text-sm"><MessageCircle size={18} /> {post.comments}</span>
         <span className="flex items-center gap-1.5 text-sm"><Repeat2 size={18} /> {post.reposts}</span>
@@ -114,14 +128,10 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
 
         {post.media && (
           <div className="relative">
-            <img src={post.media} alt="" className={`w-full object-cover ${post.mediaType === "video" ? "blur-locked" : ""}`} />
+            <img src={post.media} alt="" className="w-full object-cover" />
             {post.mediaType === "video" && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-foreground/30">
-                <Play size={48} className="text-primary-foreground mb-3" fill="currentColor" />
-                <span className="text-primary-foreground font-semibold mb-2">Subscribe to watch</span>
-                <button className="px-6 py-2 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-all duration-200">
-                  Sign up to unlock
-                </button>
+              <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg bg-foreground/70 text-primary-foreground text-xs font-medium backdrop-blur-sm">
+                15s free preview · Sign up to watch full video
               </div>
             )}
           </div>
@@ -132,6 +142,13 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
           {post.hashtags && (
             <p className="text-primary text-xs mb-4">{post.hashtags.map(t => `#${t}`).join(" ")}</p>
           )}
+
+          {/* Subscribe CTA in modal */}
+          <button className="w-full mb-4 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-[hsl(280,80%,55%)] text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5 shadow-lg">
+            <Crown size={16} />
+            Subscribe to {post.creator.name} — {post.creator.price}
+          </button>
+
           <div className="flex items-center gap-5 text-muted-foreground text-sm pt-3 border-t border-border">
             <span className="flex items-center gap-1"><Heart size={16} /> {post.likes}</span>
             <span className="flex items-center gap-1"><MessageCircle size={16} /> {post.comments}</span>
@@ -144,7 +161,7 @@ const PostPreviewModal = ({ post, onClose }: { post: Post; onClose: () => void }
 };
 
 const FeaturedPosts = () => {
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [visibleCount, setVisibleCount] = useState(4);
   const [previewPost, setPreviewPost] = useState<Post | null>(null);
   const visiblePosts = posts.slice(0, visibleCount);
 
@@ -169,7 +186,7 @@ const FeaturedPosts = () => {
       {visibleCount < posts.length && (
         <div className="text-center mt-10">
           <button
-            onClick={() => setVisibleCount(posts.length)}
+            onClick={() => setVisibleCount((c) => Math.min(c + 4, posts.length))}
             className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all duration-200 hover:-translate-y-0.5"
           >
             Load more featured posts
