@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, ImageIcon, Gift, Smile, MoreVertical, Search, BadgeCheck, Circle } from "lucide-react";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
 import MobileNav from "@/components/app/MobileNav";
 import { conversations as initialConversations, type Conversation, type Message } from "@/data/mockMessages";
+import { creators } from "@/data/mockData";
 
 const Messages = () => {
   const [convos, setConvos] = useState<Conversation[]>(initialConversations);
