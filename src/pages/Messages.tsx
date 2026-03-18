@@ -1,18 +1,56 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, ImageIcon, Gift, Smile, MoreVertical, Search, BadgeCheck, Circle } from "lucide-react";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
 import MobileNav from "@/components/app/MobileNav";
 import { conversations as initialConversations, type Conversation, type Message } from "@/data/mockMessages";
+import { creators } from "@/data/mockData";
 
 const Messages = () => {
-  const [convos, setConvos] = useState<Conversation[]>(initialConversations);
-  const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [convos, setConvos] = useState<Conversation[]>(() => {
+    const creatorId = searchParams.get("creator");
+    if (creatorId && !initialConversations.find((c) => c.creator.id === creatorId)) {
+      const creator = creators.find((c) => c.id === creatorId);
+      if (creator) {
+        return [
+          {
+            id: `conv-new-${creatorId}`,
+            creator,
+            messages: [],
+            lastActive: "Now",
+            unreadCount: 0,
+          },
+          ...initialConversations,
+        ];
+      }
+    }
+    return initialConversations;
+  });
+
+  const [activeConvoId, setActiveConvoId] = useState<string | null>(() => {
+    const creatorId = searchParams.get("creator");
+    if (creatorId) {
+      const existing = initialConversations.find((c) => c.creator.id === creatorId);
+      if (existing) return existing.id;
+      return `conv-new-${creatorId}`;
+    }
+    return null;
+  });
+
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Clear query param after initial load
+  useEffect(() => {
+    if (searchParams.has("creator")) {
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
 
   const activeConvo = convos.find((c) => c.id === activeConvoId) ?? null;
 

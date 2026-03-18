@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import HomePage from "./pages/Home";
 import CreatorProfile from "./pages/CreatorProfile";
 import Messages from "./pages/Messages";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/home" element={<HomePage />} />
           <Route path="/creator/:handle" element={<CreatorProfile />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
