@@ -107,7 +107,7 @@ const CreatorProfile = () => {
                 <button onClick={() => setShowTipModal(true)} className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors" title="Send Tip">
                   <Gift size={16} />
                 </button>
-                <button className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors">
+                <button onClick={() => navigate(`/messages?creator=${creator.id}`)} className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors" title="Send Message">
                   <Mail size={16} />
                 </button>
                 <button className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors">
