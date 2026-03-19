@@ -8,6 +8,7 @@ import HomePage from "./pages/Home";
 import CreatorProfile from "./pages/CreatorProfile";
 import Messages from "./pages/Messages";
 import UserProfile from "./pages/UserProfile";
+import Discover from "./pages/Discover";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
