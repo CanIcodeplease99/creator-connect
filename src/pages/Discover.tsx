@@ -55,7 +55,7 @@ const CreatorCard = ({ creator, index }: { creator: Creator; index: number }) =>
         {creator.isOnline && !creator.isLive && (
           <div className="absolute top-3 left-3">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm text-[11px] font-medium text-foreground">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Online
             </span>
           </div>

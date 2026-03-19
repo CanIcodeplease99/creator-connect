@@ -24,6 +24,7 @@ const App = () => (
           <Route path="/home" element={<HomePage />} />
           <Route path="/creator/:handle" element={<CreatorProfile />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/discover" element={<Discover />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
