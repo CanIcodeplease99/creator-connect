@@ -131,7 +131,7 @@ const LiveCreatorStrip = ({ liveCreators }: { liveCreators: Creator[] }) => {
             key={c.id}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            onClick={() => navigate(`/creator/${c.handle.replace("@", "")}`)}
+            onClick={() => navigate(`/live/${c.handle.replace("@", "")}`)}
             className="flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-accent/30 hover:border-accent/60 shadow-card hover:shadow-lift transition-all duration-200"
           >
             <div className="relative">
