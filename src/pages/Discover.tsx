@@ -32,7 +32,7 @@ const CreatorCard = ({ creator, index }: { creator: Creator; index: number }) =>
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.3 }}
-      onClick={() => navigate(`/creator/${creator.handle.replace("@", "")}`)}
+      onClick={() => navigate(creator.isLive ? `/live/${creator.handle.replace("@", "")}` : `/creator/${creator.handle.replace("@", "")}`)}
       className="group relative rounded-2xl overflow-hidden bg-card shadow-card hover:shadow-lift cursor-pointer transition-all duration-250"
     >
       {/* Cover */}
