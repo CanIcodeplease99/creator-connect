@@ -11,7 +11,7 @@ const CreatorSuggestionCard = ({ creator }: { creator: Creator }) => {
 
   return (
     <div
-      onClick={() => navigate(`/creator/${creator.handle.replace("@", "")}`)}
+      onClick={() => navigate(creator.isLive ? `/live/${creator.handle.replace("@", "")}` : `/creator/${creator.handle.replace("@", "")}`)}
       className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-lift transition-all duration-250"
     >
       {/* Cover image */}
