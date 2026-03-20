@@ -380,6 +380,21 @@ const LiveStream = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Public / Private toggle */}
+              <button
+                onClick={() => {
+                  setIsPrivate(!isPrivate);
+                  if (!isPrivate) setPrivateUnlocked(false);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  isPrivate
+                    ? "bg-yellow-500/20 backdrop-blur-sm text-yellow-300 border border-yellow-500/30"
+                    : "bg-black/50 backdrop-blur-sm text-white/80 hover:text-white"
+                }`}
+              >
+                {isPrivate ? <Lock size={12} /> : <Eye size={12} />}
+                {isPrivate ? "Private" : "Public"}
+              </button>
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-bold">
                 <Radio size={12} className="animate-pulse" />
                 LIVE
@@ -388,7 +403,6 @@ const LiveStream = () => {
                 <Users size={12} />
                 {viewerCount.toLocaleString()}
               </span>
-              {/* Stream earnings */}
               <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/20 backdrop-blur-sm text-yellow-300 text-xs font-bold">
                 <Coins size={12} />
                 {totalGiftsValue.toLocaleString()}
