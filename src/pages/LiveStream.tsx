@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, BadgeCheck, Heart, Send, Users, Share2,
   MoreHorizontal, Volume2, VolumeX, Maximize, Radio,
-  Coins, X, ChevronUp, Trophy
+  Coins, X, ChevronUp, Trophy, Lock, Eye
 } from "lucide-react";
 import { creators } from "@/data/mockData";
 import { streamGifts, coinPackages, type StreamGift } from "@/data/coins";

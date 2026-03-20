@@ -10,6 +10,7 @@ import Messages from "./pages/Messages";
 import UserProfile from "./pages/UserProfile";
 import Discover from "./pages/Discover";
 import LiveStream from "./pages/LiveStream";
+import CreatorDashboard from "./pages/CreatorDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/messages" element={<Messages />} />
           <Route path="/discover" element={<Discover />} />
           <Route path="/live/:handle" element={<LiveStream />} />
+          <Route path="/dashboard" element={<CreatorDashboard />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
