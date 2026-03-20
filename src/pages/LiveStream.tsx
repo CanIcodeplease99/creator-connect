@@ -298,6 +298,8 @@ const LiveStream = () => {
     setCoinBalance((prev) => prev + coins);
   };
 
+  const showPrivateWall = isPrivate && !privateUnlocked;
+
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-black">
       {/* Video area */}
@@ -306,9 +308,53 @@ const LiveStream = () => {
           <img
             src={creator.cover}
             alt={`${creator.name} live stream`}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${showPrivateWall ? "blur-xl scale-110" : ""} transition-all duration-500`}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+
+          {/* Private stream paywall overlay */}
+          {showPrivateWall && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="absolute inset-0 z-30 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-center px-6 max-w-sm"
+              >
+                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                  <Lock size={32} className="text-primary" />
+                </div>
+                <h3 className="text-white text-xl font-bold mb-2">Private Stream</h3>
+                <p className="text-white/70 text-sm mb-1">This is an exclusive private stream by {creator.name}</p>
+                <p className="text-yellow-400 text-lg font-bold mb-5 flex items-center justify-center gap-1.5">
+                  <Coins size={18} />
+                  200 coins to unlock
+                </p>
+                <button
+                  onClick={() => {
+                    if (coinBalance >= 200) {
+                      setCoinBalance(prev => prev - 200);
+                      setPrivateUnlocked(true);
+                    } else {
+                      setShowBuyCoins(true);
+                    }
+                  }}
+                  className="w-full py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all shadow-lg mb-3"
+                >
+                  {coinBalance >= 200 ? "Unlock Stream · 200 coins" : "Buy Coins to Unlock"}
+                </button>
+                <button
+                  onClick={() => navigate(-1)}
+                  className="text-white/50 text-sm hover:text-white/80 transition-colors"
+                >
+                  Go back
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
 
           {/* Floating gift animations */}
           <AnimatePresence>
