@@ -103,16 +103,33 @@ const CreatorProfile = () => {
                   <span className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500 border-2 border-card" />
                 )}
               </div>
-              <div className="flex gap-1.5 sm:gap-2 pb-1 sm:pb-2">
-                <button onClick={() => setShowTipModal(true)} className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors" title="Send Tip">
-                  <Gift size={16} />
-                </button>
-                <button onClick={() => navigate(`/messages?creator=${creator.id}`)} className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors" title="Send Message">
-                  <Mail size={16} />
-                </button>
-                <button className="p-2 sm:p-2.5 rounded-full border border-border text-foreground hover:bg-secondary transition-colors">
-                  <Star size={16} />
-                </button>
+              <div className="flex gap-2 sm:gap-2.5 pb-1 sm:pb-2">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowTipModal(true)}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 text-white flex items-center justify-center shadow-lg shadow-orange-400/30 hover:shadow-orange-400/50 transition-shadow"
+                  title="Send Tip"
+                >
+                  <Gift size={20} strokeWidth={2.5} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => navigate(`/messages?creator=${creator.id}`)}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-400 via-indigo-500 to-violet-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-shadow"
+                  title="Send Message"
+                >
+                  <Mail size={20} strokeWidth={2.5} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 15 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-pink-400 via-rose-400 to-red-400 text-white flex items-center justify-center shadow-lg shadow-rose-400/30 hover:shadow-rose-400/50 transition-shadow"
+                  title="Favourite"
+                >
+                  <Star size={20} strokeWidth={2.5} fill="currentColor" />
+                </motion.button>
               </div>
             </div>
 
