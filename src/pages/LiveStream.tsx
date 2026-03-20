@@ -530,12 +530,7 @@ const LiveStream = () => {
             </motion.div>
           )}
 
-          {/* Floating gift animations */}
-          <AnimatePresence>
-            {floatingGifts.map((fg) => (
-              <GiftAnimation key={fg.id} fg={fg} onDone={() => removeFloatingGift(fg.id)} />
-            ))}
-          </AnimatePresence>
+          {/* (gift animations rendered at page root for full-screen bleed) */}
 
           {/* Top controls */}
           <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between">
