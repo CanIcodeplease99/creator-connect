@@ -748,6 +748,13 @@ const LiveStream = () => {
           />
         )}
       </AnimatePresence>
+
+      {/* Full-screen gift animations (rendered at root for full bleed) */}
+      <AnimatePresence>
+        {floatingGifts.map((fg) => (
+          <GiftAnimation key={fg.id} fg={fg} onDone={() => removeFloatingGift(fg.id)} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 };
