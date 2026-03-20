@@ -235,6 +235,8 @@ const LiveStream = () => {
   const [showBuyCoins, setShowBuyCoins] = useState(false);
   const [floatingGifts, setFloatingGifts] = useState<FloatingGift[]>([]);
   const [totalGiftsValue, setTotalGiftsValue] = useState(4230);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [privateUnlocked, setPrivateUnlocked] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const creator = creators.find((c) => c.handle.replace("@", "") === handle);

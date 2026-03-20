@@ -125,28 +125,45 @@ const LiveCreatorStrip = ({ liveCreators }: { liveCreators: Creator[] }) => {
         <Radio size={16} className="text-accent animate-pulse" />
         <h2 className="font-bold text-foreground text-sm uppercase tracking-wide">Live Now</h2>
       </div>
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-        {liveCreators.map((c) => (
-          <motion.button
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {liveCreators.map((c, i) => (
+          <motion.div
             key={c.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04, duration: 0.3 }}
             onClick={() => navigate(`/live/${c.handle.replace("@", "")}`)}
-            className="flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-2xl bg-card border border-accent/30 hover:border-accent/60 shadow-card hover:shadow-lift transition-all duration-200"
+            className="group relative rounded-2xl overflow-hidden bg-card shadow-card hover:shadow-lift cursor-pointer transition-all duration-250"
           >
-            <div className="relative">
-              <img src={c.avatar} alt={c.name} className="w-12 h-12 rounded-full object-cover ring-2 ring-accent ring-offset-2 ring-offset-card" />
-              <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-accent border-2 border-card" />
-            </div>
-            <div className="text-left">
-              <div className="flex items-center gap-1">
-                <span className="font-bold text-foreground text-sm">{c.name}</span>
-                {c.verified && <BadgeCheck size={12} className="text-primary" />}
+            {/* Cover */}
+            <div className="relative h-32 sm:h-36 overflow-hidden">
+              <img src={c.cover} alt={c.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <div className="absolute top-3 left-3">
+                <LiveBadge />
               </div>
-              <span className="text-muted-foreground text-xs">{c.category}</span>
+              <div className="absolute bottom-3 right-3">
+                <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium">
+                  <Users size={11} />
+                  {Math.floor(Math.random() * 800 + 200)}
+                </span>
+              </div>
             </div>
-            <LiveBadge />
-          </motion.button>
+            {/* Info */}
+            <div className="relative px-4 pb-4 pt-0">
+              <div className="absolute -top-7 left-4">
+                <img src={c.avatar} alt={c.name} className="w-14 h-14 rounded-full border-[3px] border-card bg-muted object-cover ring-2 ring-accent ring-offset-1 ring-offset-card" />
+              </div>
+              <div className="pt-9">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-bold text-foreground text-sm truncate">{c.name}</h3>
+                  {c.verified && <BadgeCheck size={14} className="text-primary shrink-0" />}
+                </div>
+                <p className="text-muted-foreground text-xs mt-0.5">{c.handle}</p>
+                <p className="text-muted-foreground text-xs mt-1 line-clamp-1">{c.category} · {c.tagline}</p>
+              </div>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>
