@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Bell, Mail, CreditCard, Compass, Bookmark, Settings, PenSquare, BadgeCheck } from "lucide-react";
+import { Home, Bell, Mail, CreditCard, Compass, Bookmark, Settings, PenSquare, BadgeCheck, Heart, Crown } from "lucide-react";
 
 const navItems = [
   { label: "Home", icon: Home, path: "/home" },
@@ -7,6 +7,7 @@ const navItems = [
   { label: "Messages", icon: Mail, path: "/messages" },
   { label: "Subscriptions", icon: CreditCard, path: "/subscriptions" },
   { label: "Discover", icon: Compass, path: "/discover" },
+  { label: "Dating", icon: Heart, path: "/dating" },
   { label: "Collections", icon: Bookmark, path: "/collections" },
   { label: "Settings", icon: Settings, path: "/settings" },
 ];
@@ -42,6 +43,20 @@ const SidebarNav = () => {
           );
         })}
       </nav>
+
+      {/* Lounge - discreet link */}
+      <button
+        onClick={() => navigate("/lounge")}
+        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 mb-3 ${
+          location.pathname === "/lounge"
+            ? "bg-yellow-500/10 text-yellow-600 font-semibold"
+            : "text-muted-foreground/60 hover:text-muted-foreground hover:bg-secondary"
+        }`}
+      >
+        <Crown size={16} className={location.pathname === "/lounge" ? "text-yellow-500" : "text-muted-foreground/40"} />
+        <span>Lounge</span>
+        <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-bold bg-muted text-muted-foreground">18+</span>
+      </button>
 
       {/* New Post */}
       <button className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-semibold mb-6 hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 shadow-card">
