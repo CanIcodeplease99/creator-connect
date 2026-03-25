@@ -47,32 +47,51 @@ const Particle = ({ delay, x, y, emoji, size }: { delay: number; x: number; y: n
   </motion.span>
 );
 
-/* ── Full-screen gift animation (TikTok/Snapchat style) ── */
+/* ── Full-screen gift animation (TikTok/Snapchat style) — ULTRA RICH ── */
 const GiftAnimation = ({ fg, onDone }: { fg: FloatingGift; onDone: () => void }) => {
   const tier = fg.gift.coins >= 1000 ? "legendary" : fg.gift.coins >= 199 ? "epic" : fg.gift.coins >= 50 ? "rare" : "common";
 
   useEffect(() => {
-    const duration = tier === "legendary" ? 5000 : tier === "epic" ? 4000 : tier === "rare" ? 3200 : 2500;
+    const duration = tier === "legendary" ? 6000 : tier === "epic" ? 4500 : tier === "rare" ? 3500 : 2800;
     const t = setTimeout(onDone, duration);
     return () => clearTimeout(t);
   }, [onDone, tier]);
 
-  // Generate particle positions
-  const particles = Array.from({ length: tier === "legendary" ? 24 : tier === "epic" ? 16 : tier === "rare" ? 10 : 5 }, (_, i) => ({
+  const particleCount = tier === "legendary" ? 36 : tier === "epic" ? 22 : tier === "rare" ? 14 : 6;
+  const particles = Array.from({ length: particleCount }, (_, i) => ({
     id: i,
-    x: (Math.random() - 0.5) * (tier === "legendary" ? 600 : 400),
-    y: (Math.random() - 0.5) * (tier === "legendary" ? 500 : 300) - 100,
-    delay: Math.random() * 0.4,
-    size: tier === "legendary" ? 28 + Math.random() * 20 : 18 + Math.random() * 14,
+    x: (Math.random() - 0.5) * (tier === "legendary" ? 800 : tier === "epic" ? 600 : 400),
+    y: (Math.random() - 0.5) * (tier === "legendary" ? 700 : 400) - 150,
+    delay: Math.random() * 0.5,
+    size: tier === "legendary" ? 32 + Math.random() * 24 : 18 + Math.random() * 16,
   }));
 
-  // Streaking emojis that fly across screen
-  const streamers = tier === "legendary" || tier === "epic" ? Array.from({ length: tier === "legendary" ? 8 : 4 }, (_, i) => ({
+  const streamerCount = tier === "legendary" ? 14 : tier === "epic" ? 8 : tier === "rare" ? 3 : 0;
+  const streamers = Array.from({ length: streamerCount }, (_, i) => ({
     id: i,
     startX: Math.random() * 100,
-    startY: 100 + Math.random() * 20,
-    delay: i * 0.15,
-  })) : [];
+    delay: i * 0.1,
+  }));
+
+  // Confetti pieces for legendary/epic
+  const confettiCount = tier === "legendary" ? 50 : tier === "epic" ? 25 : 0;
+  const confetti = Array.from({ length: confettiCount }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    delay: Math.random() * 1.5,
+    color: ["#FFD700", "#FF6B6B", "#A855F7", "#3B82F6", "#10B981", "#F59E0B", "#EC4899"][i % 7],
+    size: 6 + Math.random() * 8,
+    rotation: Math.random() * 720 - 360,
+  }));
+
+  // Side sparkle trails
+  const sparkleTrails = tier === "legendary" ? 8 : tier === "epic" ? 4 : 0;
+  const trails = Array.from({ length: sparkleTrails }, (_, i) => ({
+    id: i,
+    side: i % 2 === 0 ? "left" : "right",
+    y: 10 + (i / sparkleTrails) * 80,
+    delay: 0.3 + i * 0.15,
+  }));
 
   return (
     <motion.div
@@ -82,93 +101,190 @@ const GiftAnimation = ({ fg, onDone }: { fg: FloatingGift; onDone: () => void })
       transition={{ duration: 0.3 }}
       className="fixed inset-0 pointer-events-none z-50"
     >
-      {/* Full-screen colour wash for legendary/epic */}
+      {/* ── SCREEN SHAKE for epic/legendary ── */}
+      {(tier === "legendary" || tier === "epic") && (
+        <motion.div
+          animate={{
+            x: tier === "legendary" ? [0, -8, 8, -6, 6, -3, 3, 0] : [0, -4, 4, -2, 2, 0],
+            y: tier === "legendary" ? [0, -5, 5, -4, 4, -2, 0] : [0, -3, 3, -1, 0],
+          }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="absolute inset-0"
+        />
+      )}
+
+      {/* ── FULL-SCREEN FLASH ── */}
+      {tier !== "common" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, tier === "legendary" ? 0.7 : 0.4, 0] }}
+          transition={{ duration: 0.3 }}
+          className="absolute inset-0 bg-white"
+        />
+      )}
+
+      {/* ── Full-screen colour wash ── */}
       {(tier === "legendary" || tier === "epic") && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.3, 0.15, 0] }}
-          transition={{ duration: tier === "legendary" ? 4 : 3, ease: "easeOut" }}
+          animate={{ opacity: [0, 0.35, 0.2, 0.1, 0] }}
+          transition={{ duration: tier === "legendary" ? 5 : 3.5, ease: "easeOut" }}
           className={`absolute inset-0 ${
             tier === "legendary"
-              ? "bg-gradient-to-t from-yellow-500/40 via-orange-500/20 to-transparent"
-              : "bg-gradient-to-t from-purple-500/30 via-pink-500/10 to-transparent"
+              ? "bg-gradient-to-t from-yellow-500/50 via-orange-500/30 to-red-500/10"
+              : "bg-gradient-to-t from-purple-500/40 via-pink-500/20 to-transparent"
           }`}
         />
       )}
 
-      {/* Screen-edge glow pulse for rare+ */}
+      {/* ── Pulsing edge vignette ── */}
       {tier !== "common" && (
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 0.6, 0] }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          animate={{ opacity: [0, 0.7, 0.3, 0.5, 0] }}
+          transition={{ duration: 2.5, ease: "easeOut" }}
           className="absolute inset-0"
           style={{
             boxShadow: tier === "legendary"
-              ? "inset 0 0 120px 40px rgba(234,179,8,0.3)"
+              ? "inset 0 0 200px 80px rgba(234,179,8,0.35), inset 0 0 80px 30px rgba(239,68,68,0.2)"
               : tier === "epic"
-              ? "inset 0 0 80px 30px rgba(168,85,247,0.25)"
-              : "inset 0 0 60px 20px rgba(59,130,246,0.2)",
+              ? "inset 0 0 150px 60px rgba(168,85,247,0.3), inset 0 0 60px 20px rgba(236,72,153,0.15)"
+              : "inset 0 0 100px 40px rgba(59,130,246,0.2)",
           }}
         />
       )}
 
-      {/* Streaking emojis flying upward across screen */}
+      {/* ── Multiple shockwave rings ── */}
+      {tier !== "common" && [0, 1, 2].slice(0, tier === "legendary" ? 3 : tier === "epic" ? 2 : 1).map((ring) => (
+        <motion.div
+          key={`ring-${ring}`}
+          initial={{ scale: 0, opacity: 0.9 }}
+          animate={{ scale: [0, 4 + ring * 2, 8 + ring * 3], opacity: [0.9, 0.2, 0] }}
+          transition={{ duration: 1.5, delay: ring * 0.2, ease: "easeOut" }}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-2 ${
+            tier === "legendary" ? "border-yellow-400/60" : tier === "epic" ? "border-purple-400/60" : "border-blue-400/50"
+          }`}
+        />
+      ))}
+
+      {/* ── Streaking emojis flying upward ── */}
       {streamers.map((s) => (
         <motion.span
           key={`stream-${s.id}`}
-          initial={{ x: `${s.startX}%`, y: "110%", opacity: 0.9, scale: 0.8 }}
-          animate={{ y: "-20%", opacity: [0.9, 0.9, 0], scale: [0.8, 1.2, 0.5], rotate: [0, -15 + Math.random() * 30] }}
-          transition={{ duration: 1.6 + Math.random() * 0.6, delay: s.delay, ease: "easeOut" }}
-          className="absolute text-3xl pointer-events-none"
+          initial={{ x: `${s.startX}%`, y: "110%", opacity: 1, scale: 0.6 }}
+          animate={{
+            y: "-20%",
+            opacity: [1, 1, 0.8, 0],
+            scale: [0.6, 1.4, 1, 0.3],
+            rotate: [0, -20 + Math.random() * 40],
+          }}
+          transition={{ duration: 1.8 + Math.random() * 0.8, delay: s.delay, ease: "easeOut" }}
+          className="absolute text-4xl pointer-events-none"
+          style={{
+            filter: tier === "legendary" ? "drop-shadow(0 0 12px rgba(234,179,8,0.5))" : undefined,
+          }}
         >
           {fg.gift.emoji}
         </motion.span>
       ))}
 
-      {/* Centre-stage gift reveal */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {/* Shockwave ring for rare+ */}
-        {tier !== "common" && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0.8 }}
-            animate={{ scale: [0, 3, 5], opacity: [0.8, 0.3, 0] }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className={`absolute w-24 h-24 rounded-full border-2 ${
-              tier === "legendary" ? "border-yellow-400" : tier === "epic" ? "border-purple-400" : "border-blue-400"
-            }`}
-          />
-        )}
-
-        {/* Main emoji with dramatic entrance */}
+      {/* ── CONFETTI RAIN (legendary/epic) ── */}
+      {confetti.map((c) => (
         <motion.div
-          initial={{ scale: 0, rotate: -30 }}
+          key={`confetti-${c.id}`}
+          initial={{ x: `${c.x}%`, y: "-5%", opacity: 1, rotate: 0 }}
           animate={{
-            scale: tier === "legendary" ? [0, 2.5, 1.8] : tier === "epic" ? [0, 2, 1.5] : tier === "rare" ? [0, 1.6, 1.2] : [0, 1.3, 1],
-            rotate: [tier === "legendary" ? -30 : -15, 8, 0],
+            y: "110%",
+            opacity: [1, 1, 0.7, 0],
+            rotate: c.rotation,
+            x: `${c.x + (Math.random() - 0.5) * 20}%`,
           }}
-          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+          transition={{ duration: 3 + Math.random() * 2, delay: c.delay, ease: [0.25, 0.1, 0.25, 1] }}
+          className="absolute pointer-events-none rounded-sm"
+          style={{
+            width: c.size,
+            height: c.size * 0.4,
+            backgroundColor: c.color,
+            boxShadow: `0 0 6px ${c.color}80`,
+          }}
+        />
+      ))}
+
+      {/* ── Side sparkle trails ── */}
+      {trails.map((t) => (
+        <motion.div
+          key={`trail-${t.id}`}
+          initial={{ opacity: 0, x: t.side === "left" ? -20 : 20 }}
+          animate={{
+            opacity: [0, 1, 0.5, 0],
+            x: t.side === "left" ? [-20, 30, 60] : [20, -30, -60],
+            scale: [0.5, 1.2, 0],
+          }}
+          transition={{ duration: 1.2, delay: t.delay }}
+          className="absolute pointer-events-none text-2xl"
+          style={{ top: `${t.y}%`, [t.side]: 0 }}
+        >
+          ✨
+        </motion.div>
+      ))}
+
+      {/* ── Centre-stage gift reveal ── */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {/* Main emoji with DRAMATIC entrance */}
+        <motion.div
+          initial={{ scale: 0, rotate: -45 }}
+          animate={{
+            scale: tier === "legendary"
+              ? [0, 3.5, 2.8, 3, 2.5]
+              : tier === "epic"
+              ? [0, 2.5, 2, 2.2, 1.8]
+              : tier === "rare"
+              ? [0, 2, 1.5]
+              : [0, 1.5, 1.2],
+            rotate: [tier === "legendary" ? -45 : -20, 12, -5, 0],
+          }}
+          transition={{
+            duration: tier === "legendary" ? 1.2 : 0.7,
+            ease: [0.34, 1.56, 0.64, 1],
+          }}
           className="relative"
         >
-          {/* Glow behind emoji */}
+          {/* Multi-layer glow behind emoji */}
           {tier !== "common" && (
-            <motion.div
-              animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0.2, 0.5] }}
-              transition={{ duration: 2, repeat: 2, ease: "easeInOut" }}
-              className={`absolute inset-0 blur-2xl rounded-full -m-8 ${
-                tier === "legendary" ? "bg-yellow-400/50" : tier === "epic" ? "bg-purple-400/40" : "bg-blue-400/30"
-              }`}
-            />
+            <>
+              <motion.div
+                animate={{ scale: [1, 2, 1.5, 2, 1], opacity: [0.4, 0.15, 0.3, 0.1, 0] }}
+                transition={{ duration: 3, ease: "easeInOut" }}
+                className={`absolute inset-0 blur-3xl rounded-full -m-16 ${
+                  tier === "legendary" ? "bg-yellow-400/60" : tier === "epic" ? "bg-purple-400/50" : "bg-blue-400/40"
+                }`}
+              />
+              <motion.div
+                animate={{ scale: [1, 1.8, 1], opacity: [0.6, 0.2, 0] }}
+                transition={{ duration: 2, ease: "easeOut" }}
+                className={`absolute inset-0 blur-xl rounded-full -m-10 ${
+                  tier === "legendary" ? "bg-orange-500/40" : tier === "epic" ? "bg-pink-500/30" : "bg-cyan-400/25"
+                }`}
+              />
+            </>
           )}
-          <span
-            className="relative drop-shadow-2xl"
+          <motion.span
+            animate={tier === "legendary" ? {
+              filter: [
+                "drop-shadow(0 0 20px rgba(234,179,8,0.8))",
+                "drop-shadow(0 0 60px rgba(234,179,8,0.4))",
+                "drop-shadow(0 0 30px rgba(234,179,8,0.6))",
+              ],
+            } : {}}
+            transition={{ duration: 2, repeat: 1 }}
+            className="relative"
             style={{
-              fontSize: tier === "legendary" ? 96 : tier === "epic" ? 80 : tier === "rare" ? 64 : 48,
-              filter: tier === "legendary" ? "drop-shadow(0 0 30px rgba(234,179,8,0.6))" : undefined,
+              fontSize: tier === "legendary" ? 120 : tier === "epic" ? 96 : tier === "rare" ? 72 : 52,
+              display: "block",
             }}
           >
             {fg.gift.emoji}
-          </span>
+          </motion.span>
         </motion.div>
 
         {/* Particle burst from centre */}
@@ -177,31 +293,43 @@ const GiftAnimation = ({ fg, onDone }: { fg: FloatingGift; onDone: () => void })
         ))}
       </div>
 
-      {/* Gift info banner - slides in from left (TikTok style) */}
+      {/* ── Gift info banner - TikTok slide-in ── */}
       <motion.div
-        initial={{ x: -300, opacity: 0 }}
+        initial={{ x: -400, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
-        exit={{ x: -300, opacity: 0 }}
-        transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute bottom-32 left-4 sm:left-8"
+        exit={{ x: -400, opacity: 0 }}
+        transition={{ delay: 0.2, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute bottom-28 left-4 sm:left-8"
       >
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl backdrop-blur-xl border ${
-          tier === "legendary"
-            ? "bg-gradient-to-r from-yellow-500/30 to-orange-500/20 border-yellow-500/40"
-            : tier === "epic"
-            ? "bg-gradient-to-r from-purple-500/30 to-pink-500/20 border-purple-500/40"
-            : tier === "rare"
-            ? "bg-gradient-to-r from-blue-500/20 to-cyan-500/10 border-blue-500/30"
-            : "bg-black/40 border-white/10"
-        }`}>
-          <span className="text-3xl">{fg.gift.emoji}</span>
+        <motion.div
+          animate={tier === "legendary" ? { scale: [1, 1.03, 1] } : {}}
+          transition={{ duration: 1.5, repeat: 2 }}
+          className={`flex items-center gap-3 px-5 py-3.5 rounded-2xl backdrop-blur-xl border shadow-xl ${
+            tier === "legendary"
+              ? "bg-gradient-to-r from-yellow-500/40 via-orange-500/30 to-red-500/20 border-yellow-400/50"
+              : tier === "epic"
+              ? "bg-gradient-to-r from-purple-500/35 to-pink-500/25 border-purple-400/40"
+              : tier === "rare"
+              ? "bg-gradient-to-r from-blue-500/25 to-cyan-500/15 border-blue-400/30"
+              : "bg-black/50 border-white/15"
+          }`}
+        >
+          <motion.span
+            animate={{ rotate: [0, -10, 10, -5, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-4xl"
+          >
+            {fg.gift.emoji}
+          </motion.span>
           <div>
-            <p className="text-white font-bold text-sm">
+            <p className="text-white font-bold text-base">
               {fg.user}
               <span className="font-normal text-white/70"> sent </span>
-              {fg.gift.name}
+              <span className={tier === "legendary" ? "text-yellow-300" : tier === "epic" ? "text-purple-300" : "text-white"}>
+                {fg.gift.name}
+              </span>
             </p>
-            <p className={`text-xs font-semibold ${
+            <p className={`text-sm font-bold ${
               tier === "legendary" ? "text-yellow-300" : tier === "epic" ? "text-purple-300" : tier === "rare" ? "text-blue-300" : "text-white/60"
             }`}>
               {fg.gift.coins.toLocaleString()} coins
@@ -210,16 +338,58 @@ const GiftAnimation = ({ fg, onDone }: { fg: FloatingGift; onDone: () => void })
               {tier === "rare" && " 🔥"}
             </p>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
-      {/* Legendary/epic: raining emojis from top */}
-      {tier === "legendary" && Array.from({ length: 20 }, (_, i) => (
+      {/* ── Legendary: MASSIVE emoji rain from ALL directions ── */}
+      {tier === "legendary" && Array.from({ length: 30 }, (_, i) => (
         <motion.span
           key={`rain-${i}`}
-          initial={{ x: `${5 + Math.random() * 90}%`, y: "-5%", opacity: 0.8 }}
-          animate={{ y: "110%", opacity: [0.8, 0.6, 0], rotate: Math.random() * 180 }}
-          transition={{ duration: 2.5 + Math.random() * 1.5, delay: 0.8 + i * 0.12, ease: "easeIn" }}
+          initial={{
+            x: `${3 + Math.random() * 94}%`,
+            y: "-8%",
+            opacity: 0.9,
+            scale: 0.5 + Math.random() * 0.8,
+          }}
+          animate={{
+            y: "115%",
+            opacity: [0.9, 0.8, 0.5, 0],
+            rotate: Math.random() * 360 - 180,
+            scale: [null, 0.3],
+          }}
+          transition={{
+            duration: 2.5 + Math.random() * 2,
+            delay: 0.5 + i * 0.08,
+            ease: "easeIn",
+          }}
+          className="absolute text-2xl pointer-events-none"
+          style={{
+            filter: "drop-shadow(0 0 8px rgba(234,179,8,0.3))",
+          }}
+        >
+          {fg.gift.emoji}
+        </motion.span>
+      ))}
+
+      {/* ── Epic: Side-burst emojis ── */}
+      {tier === "epic" && Array.from({ length: 12 }, (_, i) => (
+        <motion.span
+          key={`side-${i}`}
+          initial={{
+            x: i % 2 === 0 ? "-5%" : "105%",
+            y: `${20 + Math.random() * 60}%`,
+            opacity: 0.9,
+          }}
+          animate={{
+            x: i % 2 === 0 ? "110%" : "-10%",
+            opacity: [0.9, 0.7, 0],
+            rotate: (i % 2 === 0 ? 1 : -1) * (90 + Math.random() * 90),
+          }}
+          transition={{
+            duration: 1.5 + Math.random(),
+            delay: 0.5 + i * 0.12,
+            ease: "easeOut",
+          }}
           className="absolute text-xl pointer-events-none"
         >
           {fg.gift.emoji}

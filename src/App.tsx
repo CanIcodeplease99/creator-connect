@@ -11,6 +11,8 @@ import UserProfile from "./pages/UserProfile";
 import Discover from "./pages/Discover";
 import LiveStream from "./pages/LiveStream";
 import CreatorDashboard from "./pages/CreatorDashboard";
+import Dating from "./pages/Dating";
+import Lounge from "./pages/Lounge";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/discover" element={<Discover />} />
           <Route path="/live/:handle" element={<LiveStream />} />
           <Route path="/dashboard" element={<CreatorDashboard />} />
+          <Route path="/dating" element={<Dating />} />
+          <Route path="/lounge" element={<Lounge />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
