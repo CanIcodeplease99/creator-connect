@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Home, Compass, PenSquare, Bell, User } from "lucide-react";
+import { Home, Compass, PenSquare, Heart, User } from "lucide-react";
 
 const mobileNavItems = [
   { label: "Home", icon: Home, path: "/home" },
   { label: "Discover", icon: Compass, path: "/discover" },
   { label: "Post", icon: PenSquare, path: "/new-post" },
-  { label: "Alerts", icon: Bell, path: "/notifications" },
+  { label: "Dating", icon: Heart, path: "/dating" },
   { label: "Profile", icon: User, path: "/profile" },
 ];
 
