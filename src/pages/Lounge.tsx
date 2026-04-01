@@ -1,26 +1,68 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Eye, EyeOff, Crown, Radio, Users, BadgeCheck, Shield, AlertTriangle } from "lucide-react";
+import {
+  Lock, Crown, Radio, Users, BadgeCheck, Shield, AlertTriangle,
+  Play, Eye, ToggleLeft, ToggleRight, UserCheck, Camera, Sparkles
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { creators, type Creator } from "@/data/mockData";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
 import MobileNav from "@/components/app/MobileNav";
 
-/* ── mock premium live streams ── */
+/* ── mock lounge preview videos (short loops) ── */
+const PREVIEW_VIDEOS = [
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+];
+
 const premiumStreams = creators.map((c, i) => ({
   ...c,
   viewers: Math.floor(Math.random() * 300 + 50),
   isLive: i < 4,
-  rating: "18+",
+  rating: "18+" as const,
   category: ["Exclusive", "VIP", "Premium", "Private", "Diamond", "Platinum"][i % 6],
+  previewVideo: PREVIEW_VIDEOS[i % PREVIEW_VIDEOS.length],
 }));
+
+/* ── Looping video preview ── */
+const LoopPreview = ({ src, blur }: { src: string; blur: boolean }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    // cap at ~8 seconds loop
+    const handler = () => {
+      if (v.currentTime >= 8) v.currentTime = 0;
+    };
+    v.addEventListener("timeupdate", handler);
+    return () => v.removeEventListener("timeupdate", handler);
+  }, []);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      muted
+      autoPlay
+      loop
+      playsInline
+      className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${blur ? "blur-md brightness-75" : ""}`}
+    />
+  );
+};
 
 /* ── Age gate ── */
 const AgeGate = ({ onConfirm }: { onConfirm: () => void }) => (
   <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
     className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl"
   >
     <motion.div
@@ -36,10 +78,25 @@ const AgeGate = ({ onConfirm }: { onConfirm: () => void }) => (
       <p className="text-white/60 text-sm mb-2">
         This section contains content intended for adults only (18+).
       </p>
+      <p className="text-white/40 text-xs mb-2">
+        By entering, you confirm you are at least 18 years old and agree to our terms.
+      </p>
       <div className="flex items-center gap-2 justify-center text-yellow-400 text-xs mb-6">
         <AlertTriangle size={14} />
         <span>Premium subscription required for full access</span>
       </div>
+
+      {/* ID verification hint */}
+      <div className="mb-4 p-3 rounded-xl bg-white/5 border border-white/10 text-left">
+        <div className="flex items-center gap-2 text-white/80 text-xs font-medium mb-1">
+          <UserCheck size={14} />
+          Identity Verification
+        </div>
+        <p className="text-white/50 text-[11px]">
+          For your safety, Lounge creators must complete ID verification. Users may be asked to verify age via photo ID.
+        </p>
+      </div>
+
       <button
         onClick={onConfirm}
         className="w-full py-3.5 rounded-2xl bg-accent text-accent-foreground font-bold text-sm hover:opacity-90 transition-all mb-3"
@@ -53,10 +110,64 @@ const AgeGate = ({ onConfirm }: { onConfirm: () => void }) => (
   </motion.div>
 );
 
-/* ── Premium stream card ── */
-const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams)[0]; isPremiumUser: boolean }) => {
+/* ── Creator/User mode toggle ── */
+const ModeToggle = ({
+  isCreatorMode,
+  onToggle,
+  hasLoungeAccess,
+  onToggleAccess,
+}: {
+  isCreatorMode: boolean;
+  onToggle: () => void;
+  hasLoungeAccess: boolean;
+  onToggleAccess: () => void;
+}) => (
+  <div className="mb-6 space-y-3">
+    {/* Creator mode */}
+    <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+          <Camera size={16} className="text-white" />
+        </div>
+        <div>
+          <p className="text-foreground font-semibold text-sm">Creator Mode</p>
+          <p className="text-muted-foreground text-[11px]">Post Lounge content (separate from regular)</p>
+        </div>
+      </div>
+      <button onClick={onToggle} className="text-primary">
+        {isCreatorMode ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-muted-foreground" />}
+      </button>
+    </div>
+
+    {/* Lounge access toggle for regular users */}
+    <div className="flex items-center justify-between p-3 rounded-2xl bg-card border border-border">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <Eye size={16} className="text-white" />
+        </div>
+        <div>
+          <p className="text-foreground font-semibold text-sm">Lounge in Feed</p>
+          <p className="text-muted-foreground text-[11px]">Show Lounge content in your home feed</p>
+        </div>
+      </div>
+      <button onClick={onToggleAccess} className="text-primary">
+        {hasLoungeAccess ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-muted-foreground" />}
+      </button>
+    </div>
+  </div>
+);
+
+/* ── Premium stream card with video loop ── */
+const PremiumCard = ({
+  stream,
+  isPremiumUser,
+}: {
+  stream: (typeof premiumStreams)[0];
+  isPremiumUser: boolean;
+}) => {
   const navigate = useNavigate();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <>
@@ -64,29 +175,40 @@ const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -4 }}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
         onClick={() => {
-          if (isPremiumUser) {
-            navigate(`/live/${stream.handle.replace("@", "")}`);
-          } else {
-            setShowPaywall(true);
-          }
+          if (isPremiumUser) navigate(`/live/${stream.handle.replace("@", "")}`);
+          else setShowPaywall(true);
         }}
         className="group relative rounded-2xl overflow-hidden bg-card shadow-card hover:shadow-lift cursor-pointer transition-all duration-300"
       >
-        {/* Cover */}
-        <div className="relative h-44 overflow-hidden">
-          <img
-            src={stream.cover}
-            alt={stream.name}
-            className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${!isPremiumUser ? "blur-md" : ""}`}
-          />
+        {/* Cover / Video loop */}
+        <div className="relative h-48 sm:h-52 overflow-hidden">
+          {stream.isLive && (isHovered || window.innerWidth < 640) ? (
+            <LoopPreview src={stream.previewVideo} blur={!isPremiumUser} />
+          ) : (
+            <img
+              src={stream.cover}
+              alt={stream.name}
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${!isPremiumUser ? "blur-md" : ""}`}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+          {/* Play indicator for loop */}
+          {stream.isLive && (
+            <div className="absolute bottom-3 left-3">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white text-[10px] font-medium">
+                <Play size={10} fill="white" />
+                Preview
+              </span>
+            </div>
+          )}
 
           {/* Rating badge */}
           <div className="absolute top-3 right-3">
-            <span className="px-2 py-0.5 rounded-full bg-accent/90 text-accent-foreground text-[10px] font-bold">
-              {stream.rating}
-            </span>
+            <span className="px-2 py-0.5 rounded-full bg-accent/90 text-accent-foreground text-[10px] font-bold">{stream.rating}</span>
           </div>
 
           {/* Live / Category */}
@@ -98,12 +220,11 @@ const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams
               </span>
             )}
             <span className="px-2 py-0.5 rounded-full bg-yellow-500/20 backdrop-blur-sm text-yellow-300 text-[11px] font-bold flex items-center gap-1">
-              <Crown size={10} />
-              {stream.category}
+              <Crown size={10} />{stream.category}
             </span>
           </div>
 
-          {/* Lock overlay if not premium */}
+          {/* Lock overlay */}
           {!isPremiumUser && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/40">
               <div className="text-center">
@@ -117,8 +238,7 @@ const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams
           {stream.isLive && (
             <div className="absolute bottom-3 right-3">
               <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-[11px] font-medium">
-                <Users size={11} />
-                {stream.viewers}
+                <Users size={11} />{stream.viewers}
               </span>
             </div>
           )}
@@ -132,6 +252,10 @@ const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams
               alt={stream.name}
               className="w-14 h-14 rounded-full border-[3px] border-card bg-muted object-cover ring-2 ring-yellow-500/50 ring-offset-1 ring-offset-card"
             />
+            {/* Verified lounge creator badge */}
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center border-2 border-card">
+              <UserCheck size={10} className="text-white" />
+            </div>
           </div>
           <div className="pt-9">
             <div className="flex items-center gap-1.5">
@@ -192,7 +316,9 @@ const PremiumCard = ({ stream, isPremiumUser }: { stream: (typeof premiumStreams
 /* ── Main Lounge Page ── */
 const Lounge = () => {
   const [ageVerified, setAgeVerified] = useState(false);
-  const [isPremiumUser] = useState(false); // mock: not premium by default
+  const [isPremiumUser] = useState(false);
+  const [isCreatorMode, setIsCreatorMode] = useState(false);
+  const [hasLoungeAccess, setHasLoungeAccess] = useState(false);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -212,9 +338,65 @@ const Lounge = () => {
                 The Lounge
                 <span className="px-2 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-bold">18+</span>
               </h1>
-              <p className="text-muted-foreground text-xs">Premium exclusive content</p>
+              <p className="text-muted-foreground text-xs">Premium exclusive content • ID verified creators</p>
             </div>
           </div>
+
+          {/* Mode toggles */}
+          <ModeToggle
+            isCreatorMode={isCreatorMode}
+            onToggle={() => setIsCreatorMode(!isCreatorMode)}
+            hasLoungeAccess={hasLoungeAccess}
+            onToggleAccess={() => setHasLoungeAccess(!hasLoungeAccess)}
+          />
+
+          {/* Creator mode panel */}
+          <AnimatePresence>
+            {isCreatorMode && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden mb-6"
+              >
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 border border-yellow-500/20">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Sparkles size={18} className="text-yellow-500" />
+                    <h3 className="text-foreground font-bold text-sm">Creator Lounge Dashboard</h3>
+                  </div>
+                  <p className="text-muted-foreground text-xs mb-3">
+                    Lounge content is completely separate from your regular profile. Go live, post exclusive content, and earn premium revenue.
+                  </p>
+                  <div className="flex gap-2">
+                    <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold hover:opacity-90 transition-all">
+                      <Radio size={14} />
+                      Go Live (Lounge)
+                    </button>
+                    <button className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-card border border-border text-foreground text-xs font-medium hover:bg-secondary transition-colors">
+                      <Camera size={14} />
+                      Post Content
+                    </button>
+                  </div>
+                  <div className="mt-3 p-2 rounded-xl bg-card border border-border">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <UserCheck size={12} className="text-emerald-500" />
+                      <span>ID Verification: <span className="text-emerald-500 font-semibold">Verified</span></span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Lounge access info */}
+          {hasLoungeAccess && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2"
+            >
+              <Eye size={14} className="text-purple-400" />
+              <p className="text-foreground text-xs">Lounge content will appear in your home feed tab</p>
+            </motion.div>
+          )}
 
           {/* Live now section */}
           <div className="flex items-center gap-2 mb-3">
@@ -223,6 +405,7 @@ const Lounge = () => {
             <span className="text-muted-foreground text-xs">
               ({premiumStreams.filter((s) => s.isLive).length} streams)
             </span>
+            <span className="ml-auto text-muted-foreground text-[10px]">Hover for preview</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

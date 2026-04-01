@@ -3,10 +3,11 @@ import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from "
 import {
   Heart, X, Star, MessageCircle, Sparkles, MapPin, BadgeCheck,
   Flame, Users, Send, ImageIcon, Smile, ArrowLeft, SlidersHorizontal,
-  Zap, Crown, Eye, ChevronRight
+  Zap, Crown, Eye, ChevronRight, Filter
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { creators, type Creator } from "@/data/mockData";
+import { Slider } from "@/components/ui/slider";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
 import MobileNav from "@/components/app/MobileNav";
@@ -18,19 +19,26 @@ import MobileNav from "@/components/app/MobileNav";
 type DatingProfile = Creator & {
   age: number;
   distance: string;
+  distanceKm: number;
   bio: string;
   interests: string[];
   photos: string[];
 };
 
-const datingProfiles: DatingProfile[] = creators.map((c, i) => ({
-  ...c,
-  age: 22 + i * 2,
-  distance: `${Math.floor(Math.random() * 20 + 1)} km away`,
-  bio: c.tagline,
-  interests: [c.category, "Music", "Travel", "Photography", "Food", "Art", "Fitness"].slice(0, 3 + (i % 3)),
-  photos: [c.avatar, c.cover],
-}));
+const ALL_INTERESTS = ["Music", "Travel", "Photography", "Food", "Art", "Fitness", "Fashion", "Cooking", "Gaming", "Dance", "Tech", "Nature"];
+
+const datingProfiles: DatingProfile[] = creators.map((c, i) => {
+  const km = Math.floor(Math.random() * 50 + 1);
+  return {
+    ...c,
+    age: 22 + i * 2,
+    distance: `${km} km away`,
+    distanceKm: km,
+    bio: c.tagline,
+    interests: [c.category, ...ALL_INTERESTS.slice(i, i + 3 + (i % 2))].slice(0, 5),
+    photos: [c.avatar, c.cover],
+  };
+});
 
 interface DatingMatch {
   id: string;
@@ -50,26 +58,11 @@ interface DatingMessage {
 }
 
 const mockMatches: DatingMatch[] = [
-  {
-    id: "dm1", profile: datingProfiles[0], matchedAt: "2h ago",
-    lastMessage: "Hey! I love your music 🎵", lastMessageTime: "5m ago", unread: 2, isOnline: true,
-  },
-  {
-    id: "dm2", profile: datingProfiles[2], matchedAt: "1d ago",
-    lastMessage: "That painting is incredible!", lastMessageTime: "1h ago", unread: 0, isOnline: true,
-  },
-  {
-    id: "dm3", profile: datingProfiles[4], matchedAt: "2d ago",
-    lastMessage: "We should collab sometime 🔥", lastMessageTime: "3h ago", unread: 1, isOnline: false,
-  },
-  {
-    id: "dm4", profile: datingProfiles[1], matchedAt: "3d ago",
-    lastMessage: undefined, lastMessageTime: undefined, unread: 0, isOnline: false,
-  },
-  {
-    id: "dm5", profile: datingProfiles[5], matchedAt: "5d ago",
-    lastMessage: "What studio do you use?", lastMessageTime: "1d ago", unread: 0, isOnline: true,
-  },
+  { id: "dm1", profile: datingProfiles[0], matchedAt: "2h ago", lastMessage: "Hey! I love your music 🎵", lastMessageTime: "5m ago", unread: 2, isOnline: true },
+  { id: "dm2", profile: datingProfiles[2], matchedAt: "1d ago", lastMessage: "That painting is incredible!", lastMessageTime: "1h ago", unread: 0, isOnline: true },
+  { id: "dm3", profile: datingProfiles[4], matchedAt: "2d ago", lastMessage: "We should collab sometime 🔥", lastMessageTime: "3h ago", unread: 1, isOnline: false },
+  { id: "dm4", profile: datingProfiles[1], matchedAt: "3d ago", lastMessage: undefined, lastMessageTime: undefined, unread: 0, isOnline: false },
+  { id: "dm5", profile: datingProfiles[5], matchedAt: "5d ago", lastMessage: "What studio do you use?", lastMessageTime: "1d ago", unread: 0, isOnline: true },
 ];
 
 const mockDatingMessages: Record<string, DatingMessage[]> = {
@@ -97,9 +90,142 @@ const mockDatingMessages: Record<string, DatingMessage[]> = {
 };
 
 /* ═══════════════════════════════════════════════
-   SWIPE CARD
+   FILTER PANEL
    ═══════════════════════════════════════════════ */
-const SWIPE_THRESHOLD = 120;
+const FilterPanel = ({
+  open,
+  onClose,
+  ageRange,
+  setAgeRange,
+  maxDistance,
+  setMaxDistance,
+  selectedInterests,
+  setSelectedInterests,
+}: {
+  open: boolean;
+  onClose: () => void;
+  ageRange: [number, number];
+  setAgeRange: (v: [number, number]) => void;
+  maxDistance: number;
+  setMaxDistance: (v: number) => void;
+  selectedInterests: string[];
+  setSelectedInterests: (v: string[]) => void;
+}) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: "spring", damping: 25 }}
+          onClick={(e) => e.stopPropagation()}
+          className="w-full max-w-md bg-card rounded-t-3xl sm:rounded-3xl border border-border p-6 max-h-[85vh] overflow-y-auto"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-foreground font-bold text-lg flex items-center gap-2">
+              <SlidersHorizontal size={18} className="text-primary" />
+              Filters
+            </h3>
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium">
+              Done
+            </button>
+          </div>
+
+          {/* Age Range */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-foreground font-semibold text-sm">Age Range</label>
+              <span className="text-primary text-sm font-bold">{ageRange[0]} — {ageRange[1]}</span>
+            </div>
+            <Slider
+              min={18}
+              max={55}
+              step={1}
+              value={ageRange}
+              onValueChange={(v) => setAgeRange(v as [number, number])}
+              className="w-full"
+            />
+            <div className="flex justify-between text-muted-foreground text-[10px] mt-1">
+              <span>18</span><span>55</span>
+            </div>
+          </div>
+
+          {/* Distance */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-foreground font-semibold text-sm">Maximum Distance</label>
+              <span className="text-primary text-sm font-bold">{maxDistance} km</span>
+            </div>
+            <Slider
+              min={1}
+              max={100}
+              step={1}
+              value={[maxDistance]}
+              onValueChange={(v) => setMaxDistance(v[0])}
+              className="w-full"
+            />
+            <div className="flex justify-between text-muted-foreground text-[10px] mt-1">
+              <span>1 km</span><span>100 km</span>
+            </div>
+          </div>
+
+          {/* Interests */}
+          <div className="mb-4">
+            <label className="text-foreground font-semibold text-sm mb-3 block">Interests</label>
+            <div className="flex flex-wrap gap-2">
+              {ALL_INTERESTS.map((interest) => {
+                const active = selectedInterests.includes(interest);
+                return (
+                  <button
+                    key={interest}
+                    onClick={() =>
+                      setSelectedInterests(
+                        active
+                          ? selectedInterests.filter((i) => i !== interest)
+                          : [...selectedInterests, interest]
+                      )
+                    }
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-secondary text-muted-foreground hover:text-foreground hover:bg-secondary/80"
+                    }`}
+                  >
+                    {interest}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Reset */}
+          <button
+            onClick={() => {
+              setAgeRange([18, 45]);
+              setMaxDistance(50);
+              setSelectedInterests([]);
+            }}
+            className="w-full py-2.5 rounded-xl border border-border text-muted-foreground text-sm font-medium hover:bg-secondary transition-colors mt-2"
+          >
+            Reset Filters
+          </button>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+/* ═══════════════════════════════════════════════
+   SWIPE CARD — optimized for web + mobile
+   ═══════════════════════════════════════════════ */
+const SWIPE_THRESHOLD = 100;
 
 const SwipeCard = ({
   profile,
@@ -111,9 +237,10 @@ const SwipeCard = ({
   isTop: boolean;
 }) => {
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
-  const likeOpacity = useTransform(x, [0, 100], [0, 1]);
-  const nopeOpacity = useTransform(x, [-100, 0], [1, 0]);
+  const rotate = useTransform(x, [-300, 0, 300], [-15, 0, 15]);
+  const likeOpacity = useTransform(x, [0, 80], [0, 1]);
+  const nopeOpacity = useTransform(x, [-80, 0], [1, 0]);
+  const scale = useTransform(x, [-300, 0, 300], [0.95, 1, 0.95]);
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     if (info.offset.x > SWIPE_THRESHOLD) onSwipe("right");
@@ -126,11 +253,11 @@ const SwipeCard = ({
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.9}
       onDragEnd={handleDragEnd}
-      style={{ x, rotate, zIndex: isTop ? 10 : 1 }}
-      initial={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.7 }}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: isTop ? 1 : 0.7, y: isTop ? 0 : 12 }}
+      style={{ x, rotate, scale, zIndex: isTop ? 10 : 1 }}
+      initial={{ scale: isTop ? 1 : 0.92, opacity: isTop ? 1 : 0.6 }}
+      animate={{ scale: isTop ? 1 : 0.92, opacity: isTop ? 1 : 0.6, y: isTop ? 0 : 14 }}
       exit={{ x: 500, opacity: 0, transition: { duration: 0.3 } }}
-      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none"
+      className="absolute inset-0 cursor-grab active:cursor-grabbing select-none touch-none"
     >
       <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-lift bg-card border border-border">
         <img src={profile.cover} alt={profile.name} className="w-full h-full object-cover" draggable={false} />
@@ -138,34 +265,34 @@ const SwipeCard = ({
 
         {/* LIKE stamp */}
         <motion.div style={{ opacity: likeOpacity }}
-          className="absolute top-8 left-6 px-4 py-2 rounded-xl border-4 border-emerald-400 text-emerald-400 font-black text-3xl uppercase -rotate-[15deg]"
+          className="absolute top-6 left-4 sm:top-8 sm:left-6 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border-4 border-emerald-400 text-emerald-400 font-black text-2xl sm:text-3xl uppercase -rotate-[15deg]"
         >LIKE</motion.div>
 
         {/* NOPE stamp */}
         <motion.div style={{ opacity: nopeOpacity }}
-          className="absolute top-8 right-6 px-4 py-2 rounded-xl border-4 border-red-400 text-red-400 font-black text-3xl uppercase rotate-[15deg]"
+          className="absolute top-6 right-4 sm:top-8 sm:right-6 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border-4 border-red-400 text-red-400 font-black text-2xl sm:text-3xl uppercase rotate-[15deg]"
         >NOPE</motion.div>
 
         {/* Profile info */}
-        <div className="absolute bottom-0 left-0 right-0 p-5">
-          <div className="flex items-end gap-3 mb-3">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+          <div className="flex items-end gap-3 mb-2 sm:mb-3">
             <img src={profile.avatar} alt={profile.name}
-              className="w-14 h-14 rounded-full border-[3px] border-white object-cover" draggable={false} />
-            <div className="flex-1">
+              className="w-11 h-11 sm:w-14 sm:h-14 rounded-full border-[3px] border-white object-cover" draggable={false} />
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-white font-bold text-xl">{profile.name}</h2>
-                <span className="text-white/80 font-medium text-lg">{profile.age}</span>
-                {profile.verified && <BadgeCheck size={18} className="text-primary" />}
+                <h2 className="text-white font-bold text-lg sm:text-xl truncate">{profile.name}</h2>
+                <span className="text-white/80 font-medium text-base sm:text-lg">{profile.age}</span>
+                {profile.verified && <BadgeCheck size={16} className="text-primary shrink-0" />}
               </div>
-              <div className="flex items-center gap-1.5 text-white/60 text-sm">
-                <MapPin size={13} />{profile.distance}
+              <div className="flex items-center gap-1.5 text-white/60 text-xs sm:text-sm">
+                <MapPin size={12} />{profile.distance}
               </div>
             </div>
           </div>
-          <p className="text-white/80 text-sm mb-3 line-clamp-2">{profile.bio}</p>
-          <div className="flex flex-wrap gap-1.5">
+          <p className="text-white/80 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">{profile.bio}</p>
+          <div className="flex flex-wrap gap-1 sm:gap-1.5">
             {profile.interests.map((tag) => (
-              <span key={tag} className="px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs font-medium">{tag}</span>
+              <span key={tag} className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-white/15 backdrop-blur-sm text-white text-[10px] sm:text-xs font-medium">{tag}</span>
             ))}
           </div>
         </div>
@@ -270,7 +397,6 @@ const DatingChat = ({
       transition={{ type: "spring", damping: 25, stiffness: 250 }}
       className="absolute inset-0 z-20 flex flex-col bg-background"
     >
-      {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
         <button onClick={onBack} className="p-1.5 rounded-full hover:bg-secondary transition-colors">
           <ArrowLeft size={20} className="text-foreground" />
@@ -298,9 +424,7 @@ const DatingChat = ({
         </motion.button>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {/* Match header */}
         <div className="text-center py-4">
           <img src={match.profile.avatar} alt={match.profile.name} className="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-primary" />
           <p className="text-foreground font-semibold text-sm">{match.profile.name}</p>
@@ -330,7 +454,6 @@ const DatingChat = ({
         <div ref={endRef} />
       </div>
 
-      {/* Composer */}
       <div className="border-t border-border bg-card px-3 py-3">
         <div className="flex items-center gap-2">
           <button className="p-2 rounded-full hover:bg-secondary transition-colors text-muted-foreground"><ImageIcon size={20} /></button>
@@ -359,7 +482,6 @@ const MatchesView = ({ onOpenChat }: { onOpenChat: (match: DatingMatch) => void 
 
   return (
     <div className="flex-1 overflow-y-auto pb-20 lg:pb-6">
-      {/* New matches horizontal strip */}
       {newMatches.length > 0 && (
         <div className="px-4 pt-4 pb-2">
           <h3 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
@@ -380,16 +502,10 @@ const MatchesView = ({ onOpenChat }: { onOpenChat: (match: DatingMatch) => void 
                 <span className="text-foreground text-[11px] font-medium truncate w-16 text-center">{m.profile.name.split(" ")[0]}</span>
               </motion.button>
             ))}
-
-            {/* "Likes you" placeholder */}
-            <motion.button whileTap={{ scale: 0.95 }}
-              className="flex flex-col items-center gap-1.5 min-w-[72px]"
-            >
+            <motion.button whileTap={{ scale: 0.95 }} className="flex flex-col items-center gap-1.5 min-w-[72px]">
               <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 via-orange-400 to-red-400 flex items-center justify-center relative">
                 <Heart size={24} className="text-white" fill="white" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
-                  3
-                </span>
+                <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">3</span>
               </div>
               <span className="text-foreground text-[11px] font-medium">Likes You</span>
             </motion.button>
@@ -397,7 +513,6 @@ const MatchesView = ({ onOpenChat }: { onOpenChat: (match: DatingMatch) => void 
         </div>
       )}
 
-      {/* Conversations */}
       <div className="px-4 pt-3">
         <h3 className="text-foreground font-bold text-sm mb-2 flex items-center gap-2">
           <MessageCircle size={14} className="text-primary" />
@@ -407,9 +522,7 @@ const MatchesView = ({ onOpenChat }: { onOpenChat: (match: DatingMatch) => void 
 
       <div className="divide-y divide-border">
         {conversations.map(m => (
-          <motion.button key={m.id}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onOpenChat(m)}
+          <motion.button key={m.id} whileTap={{ scale: 0.98 }} onClick={() => onOpenChat(m)}
             className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-secondary/60 transition-colors"
           >
             <div className="relative flex-shrink-0">
@@ -419,22 +532,16 @@ const MatchesView = ({ onOpenChat }: { onOpenChat: (match: DatingMatch) => void 
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-0.5">
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className={`text-sm truncate ${m.unread > 0 ? "font-bold text-foreground" : "font-medium text-foreground"}`}>
-                    {m.profile.name}
-                  </span>
+                  <span className={`text-sm truncate ${m.unread > 0 ? "font-bold text-foreground" : "font-medium text-foreground"}`}>{m.profile.name}</span>
                   {m.profile.verified && <BadgeCheck size={13} className="text-primary flex-shrink-0" />}
                   <span className="text-[10px] text-muted-foreground">{m.profile.age}</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground flex-shrink-0 ml-2">{m.lastMessageTime}</span>
               </div>
               <div className="flex items-center justify-between">
-                <p className={`text-xs truncate ${m.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                  {m.lastMessage}
-                </p>
+                <p className={`text-xs truncate ${m.unread > 0 ? "text-foreground font-medium" : "text-muted-foreground"}`}>{m.lastMessage}</p>
                 {m.unread > 0 && (
-                  <span className="ml-2 flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    {m.unread}
-                  </span>
+                  <span className="ml-2 flex-shrink-0 w-5 h-5 rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-white text-[10px] font-bold flex items-center justify-center">{m.unread}</span>
                 )}
               </div>
             </div>
@@ -464,9 +571,7 @@ const LikesView = () => {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 pb-20 lg:pb-6">
-      {/* Upgrade banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className="mb-4 p-4 rounded-2xl bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 border border-yellow-500/20"
       >
         <div className="flex items-center gap-3">
@@ -477,17 +582,13 @@ const LikesView = () => {
             <p className="text-foreground font-bold text-sm">See who likes you</p>
             <p className="text-muted-foreground text-xs">Upgrade to KEETH Gold to see all your admirers</p>
           </div>
-          <button className="px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold hover:opacity-90 transition-opacity">
-            Upgrade
-          </button>
+          <button className="px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold hover:opacity-90 transition-opacity">Upgrade</button>
         </div>
       </motion.div>
 
-      {/* Blurred likes grid */}
       <div className="grid grid-cols-2 gap-3">
         {likedProfiles.map((p, i) => (
-          <motion.div key={p.id}
-            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
+          <motion.div key={p.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
             className="relative rounded-2xl overflow-hidden aspect-[3/4] bg-card border border-border"
           >
             <img src={p.cover} alt="Liked you" className="w-full h-full object-cover blur-lg scale-110" />
@@ -525,8 +626,22 @@ const Dating = () => {
   const [swipeAnim, setSwipeAnim] = useState<"left" | "right" | "super" | null>(null);
   const [activeChat, setActiveChat] = useState<DatingMatch | null>(null);
 
-  const currentProfile = datingProfiles[currentIdx % datingProfiles.length];
-  const nextProfile = datingProfiles[(currentIdx + 1) % datingProfiles.length];
+  // Filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [ageRange, setAgeRange] = useState<[number, number]>([18, 45]);
+  const [maxDistance, setMaxDistance] = useState(50);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+
+  // Filtered profiles
+  const filteredProfiles = datingProfiles.filter((p) => {
+    if (p.age < ageRange[0] || p.age > ageRange[1]) return false;
+    if (p.distanceKm > maxDistance) return false;
+    if (selectedInterests.length > 0 && !selectedInterests.some((i) => p.interests.includes(i))) return false;
+    return true;
+  });
+
+  const currentProfile = filteredProfiles[currentIdx % Math.max(filteredProfiles.length, 1)];
+  const nextProfile = filteredProfiles[(currentIdx + 1) % Math.max(filteredProfiles.length, 1)];
 
   const handleSwipe = useCallback(
     (dir: "left" | "right" | "super") => {
@@ -550,6 +665,7 @@ const Dating = () => {
   };
 
   const totalUnread = mockMatches.reduce((acc, m) => acc + m.unread, 0);
+  const activeFiltersCount = (ageRange[0] !== 18 || ageRange[1] !== 45 ? 1 : 0) + (maxDistance !== 50 ? 1 : 0) + (selectedInterests.length > 0 ? 1 : 0);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -567,21 +683,17 @@ const Dating = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+                className={`relative flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-3 text-xs sm:text-sm font-medium transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon size={16} fill={isActive ? "currentColor" : "none"} />
                 {tab.label}
                 {tab.id === "matches" && totalUnread > 0 && (
-                  <span className="w-4.5 h-4.5 rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-white text-[9px] font-bold flex items-center justify-center min-w-[18px] px-1">
-                    {totalUnread}
-                  </span>
+                  <span className="w-4.5 h-4.5 rounded-full bg-gradient-to-br from-pink-500 to-red-500 text-white text-[9px] font-bold flex items-center justify-center min-w-[18px] px-1">{totalUnread}</span>
                 )}
                 {tab.id === "likes" && (
-                  <span className="w-4.5 h-4.5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-[9px] font-bold flex items-center justify-center min-w-[18px] px-1">
-                    3
-                  </span>
+                  <span className="w-4.5 h-4.5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white text-[9px] font-bold flex items-center justify-center min-w-[18px] px-1">3</span>
                 )}
                 {isActive && (
                   <motion.div layoutId="dating-tab-indicator" className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-primary" />
@@ -595,35 +707,66 @@ const Dating = () => {
         <AnimatePresence mode="wait">
           {activeTab === "discover" && (
             <motion.div key="discover" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col items-center justify-center px-4 pb-20 lg:pb-6"
+              className="flex-1 flex flex-col items-center justify-center px-3 sm:px-4 pb-20 lg:pb-6"
             >
-              <div className="relative w-full max-w-[380px] h-[520px] sm:h-[560px]">
-                <AnimatePresence>
-                  <SwipeCard key={`next-${(currentIdx + 1) % datingProfiles.length}`} profile={nextProfile} onSwipe={() => {}} isTop={false} />
-                  {!swipeAnim && (
-                    <SwipeCard key={`top-${currentIdx % datingProfiles.length}`} profile={currentProfile} onSwipe={handleSwipe} isTop />
+              {/* Filter button */}
+              <div className="w-full max-w-[400px] flex justify-end mb-2 mt-2">
+                <button
+                  onClick={() => setShowFilters(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+                >
+                  <Filter size={14} />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">{activeFiltersCount}</span>
                   )}
-                </AnimatePresence>
+                </button>
               </div>
 
-              {/* Action buttons */}
-              <div className="flex items-center gap-4 mt-5">
-                <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("left")}
-                  className="w-14 h-14 rounded-full bg-card border-2 border-red-400/30 flex items-center justify-center shadow-card hover:shadow-lift hover:border-red-400 transition-all"
-                >
-                  <X size={28} className="text-red-400" />
-                </motion.button>
-                <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("super")}
-                  className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center shadow-lift hover:scale-105 transition-transform"
-                >
-                  <Star size={22} className="text-white" fill="white" />
-                </motion.button>
-                <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("right")}
-                  className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-400 flex items-center justify-center shadow-lift hover:scale-105 transition-transform"
-                >
-                  <Heart size={28} className="text-white" fill="white" />
-                </motion.button>
-              </div>
+              {filteredProfiles.length === 0 ? (
+                <div className="text-center py-20">
+                  <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
+                    <SlidersHorizontal size={32} className="text-muted-foreground" />
+                  </div>
+                  <h3 className="text-foreground font-semibold text-base mb-1">No profiles match</h3>
+                  <p className="text-muted-foreground text-sm mb-4">Try adjusting your filters</p>
+                  <button onClick={() => setShowFilters(true)} className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                    Edit Filters
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="relative w-full max-w-[360px] sm:max-w-[400px] aspect-[3/4] max-h-[65vh] sm:max-h-[70vh]">
+                    <AnimatePresence>
+                      {nextProfile && (
+                        <SwipeCard key={`next-${(currentIdx + 1) % filteredProfiles.length}`} profile={nextProfile} onSwipe={() => {}} isTop={false} />
+                      )}
+                      {!swipeAnim && currentProfile && (
+                        <SwipeCard key={`top-${currentIdx % filteredProfiles.length}`} profile={currentProfile} onSwipe={handleSwipe} isTop />
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex items-center gap-3 sm:gap-4 mt-4 sm:mt-5">
+                    <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("left")}
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-card border-2 border-red-400/30 flex items-center justify-center shadow-card hover:shadow-lift hover:border-red-400 transition-all"
+                    >
+                      <X size={24} className="text-red-400 sm:w-7 sm:h-7" />
+                    </motion.button>
+                    <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("super")}
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center shadow-lift hover:scale-105 transition-transform"
+                    >
+                      <Star size={20} className="text-white sm:w-[22px] sm:h-[22px]" fill="white" />
+                    </motion.button>
+                    <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleSwipe("right")}
+                      className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-emerald-400 to-green-400 flex items-center justify-center shadow-lift hover:scale-105 transition-transform"
+                    >
+                      <Heart size={24} className="text-white sm:w-7 sm:h-7" fill="white" />
+                    </motion.button>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 
@@ -647,25 +790,29 @@ const Dating = () => {
         {/* Chat overlay */}
         <AnimatePresence>
           {activeChat && (
-            <DatingChat
-              match={activeChat}
-              messages={mockDatingMessages[activeChat.id] || []}
-              onBack={() => setActiveChat(null)}
-            />
+            <DatingChat match={activeChat} messages={mockDatingMessages[activeChat.id] || []} onBack={() => setActiveChat(null)} />
           )}
         </AnimatePresence>
       </div>
 
       <MobileNav />
 
+      {/* Filter panel */}
+      <FilterPanel
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        ageRange={ageRange}
+        setAgeRange={setAgeRange}
+        maxDistance={maxDistance}
+        setMaxDistance={setMaxDistance}
+        selectedInterests={selectedInterests}
+        setSelectedInterests={setSelectedInterests}
+      />
+
       {/* Match popup */}
       <AnimatePresence>
         {matchPopup && (
-          <MatchPopup
-            profile={matchPopup}
-            onClose={() => setMatchPopup(null)}
-            onMessage={handleMatchMessage}
-          />
+          <MatchPopup profile={matchPopup} onClose={() => setMatchPopup(null)} onMessage={handleMatchMessage} />
         )}
       </AnimatePresence>
     </div>
