@@ -157,6 +157,29 @@ const UserProfile = () => {
             </div>
           </div>
 
+          {/* Become a Creator CTA */}
+          <div className="px-4 sm:px-6 mb-6">
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => navigate("/dashboard")}
+              className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-accent to-primary p-[2px]"
+            >
+              <div className="flex items-center justify-between rounded-2xl bg-card px-5 py-4 group hover:bg-card/80 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <Sparkles size={20} className="text-primary-foreground" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-foreground">Become a Creator</p>
+                    <p className="text-xs text-muted-foreground">Start earning from your content today</p>
+                  </div>
+                </div>
+                <ChevronRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
+              </div>
+            </motion.button>
+          </div>
+
           {/* My Subscriptions — fan subscribing to creators */}
           <div className="px-4 sm:px-6 mb-6">
             <div className="flex items-center justify-between mb-3">
