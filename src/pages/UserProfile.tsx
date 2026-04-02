@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import {
-  BadgeCheck, Camera, Edit3, MapPin, Link as LinkIcon, Calendar,
-  Heart, Users, Grid3X3, CreditCard, Settings, LogOut, ChevronRight, Bell, Shield, Palette
+  Camera, Edit3, MapPin, Link as LinkIcon, Calendar,
+  Heart, Users, Grid3X3, CreditCard, Settings, LogOut, ChevronRight, Bell, Shield, Palette, Bookmark, TrendingUp
 } from "lucide-react";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
@@ -19,6 +20,7 @@ const settingsItems = [
 ];
 
 const UserProfile = () => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
     name: "Alex Thompson",
@@ -36,10 +38,10 @@ const UserProfile = () => {
   };
 
   const stats = [
-    { val: subscribedCreators.length, label: "Subscriptions" },
-    { val: "2.1K", label: "Likes Given" },
-    { val: "R1,240", label: "Tips Sent" },
-    { val: "8", label: "Collections" },
+    { val: subscribedCreators.length, label: "Subscriptions", icon: Users },
+    { val: "2.1K", label: "Likes Given", icon: Heart },
+    { val: "R1,240", label: "Tips Sent", icon: TrendingUp },
+    { val: "8", label: "Saved", icon: Bookmark },
   ];
 
   return (
@@ -47,7 +49,7 @@ const UserProfile = () => {
       <SidebarNav />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <TopBar title="Profile" />
+        <TopBar title="My Profile" />
 
         <main className="flex-1 max-w-[820px] mx-auto w-full pb-20 lg:pb-6">
           {/* Cover */}
@@ -128,10 +130,7 @@ const UserProfile = () => {
             ) : (
               <>
                 <div className="mb-3">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <h1 className="text-xl sm:text-2xl font-bold text-foreground">{profile.name}</h1>
-                    <BadgeCheck size={18} className="text-primary" />
-                  </div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground">{profile.name}</h1>
                   <p className="text-muted-foreground text-sm">{profile.handle}</p>
                 </div>
                 <p className="text-foreground text-sm sm:text-[15px] leading-relaxed mb-4">{profile.bio}</p>
@@ -150,6 +149,7 @@ const UserProfile = () => {
             <div className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-2xl bg-secondary mb-6">
               {stats.map((stat) => (
                 <div key={stat.label} className="flex-1 flex flex-col items-center py-2 sm:py-3 rounded-xl hover:bg-card transition-colors cursor-default">
+                  <stat.icon size={14} className="text-primary mb-1" />
                   <span className="text-base sm:text-lg font-bold text-foreground">{stat.val}</span>
                   <span className="text-[10px] sm:text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{stat.label}</span>
                 </div>
@@ -157,21 +157,21 @@ const UserProfile = () => {
             </div>
           </div>
 
-          {/* Subscriptions */}
+          {/* My Subscriptions — fan subscribing to creators */}
           <div className="px-4 sm:px-6 mb-6">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <Users size={16} className="text-primary" /> My Subscriptions
+                <Users size={16} className="text-primary" /> Creators I Follow
               </h2>
               <button className="text-xs text-primary font-medium hover:underline">View all</button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {subscribedCreators.map((creator) => (
-                <motion.a
+                <motion.div
                   key={creator.id}
-                  href={`/creator/${creator.handle.replace("@", "")}`}
                   whileHover={{ y: -2 }}
-                  className="flex flex-col items-center p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all group"
+                  onClick={() => navigate(`/creator/${creator.handle.replace("@", "")}`)}
+                  className="flex flex-col items-center p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-all group cursor-pointer"
                 >
                   <div className="relative mb-2">
                     <img
@@ -185,22 +185,23 @@ const UserProfile = () => {
                   </div>
                   <span className="text-sm font-semibold text-foreground text-center truncate w-full">{creator.name}</span>
                   <span className="text-[11px] text-muted-foreground">{creator.price}</span>
-                </motion.a>
+                  <span className="text-[10px] text-primary font-medium mt-1">Subscribed ✓</span>
+                </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Activity */}
+          {/* Recent Activity */}
           <div className="px-4 sm:px-6 mb-6">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-3">
-              <Heart size={16} className="text-primary" /> Recent Activity
+              <Heart size={16} className="text-primary" /> My Activity
             </h2>
             <div className="space-y-2">
               {[
                 { text: "You liked Amara's post", time: "2h ago", icon: Heart },
                 { text: "You subscribed to Liam Chen", time: "1d ago", icon: Users },
                 { text: "You sent a tip to Sofia Reyes", time: "3d ago", icon: CreditCard },
-                { text: "You saved Zara's summer collection", time: "5d ago", icon: Grid3X3 },
+                { text: "You saved Zara's summer collection", time: "5d ago", icon: Bookmark },
               ].map((activity, i) => (
                 <motion.div
                   key={i}
