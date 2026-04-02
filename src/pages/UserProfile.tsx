@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Camera, Edit3, MapPin, Link as LinkIcon, Calendar,
-  Heart, Users, Grid3X3, CreditCard, Settings, LogOut, ChevronRight, Bell, Shield, Palette, Bookmark, TrendingUp
+  Heart, Users, Grid3X3, CreditCard, Settings, LogOut, ChevronRight, Bell, Shield, Palette, Bookmark, TrendingUp, Sparkles
 } from "lucide-react";
 import SidebarNav from "@/components/app/SidebarNav";
 import TopBar from "@/components/app/TopBar";
