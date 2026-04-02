@@ -141,7 +141,17 @@ const CreatorProfile = () => {
               <p className="text-muted-foreground text-sm">{creator.handle}</p>
             </div>
 
-            <p className="text-foreground text-sm sm:text-[15px] leading-relaxed mb-4">{creator.tagline}</p>
+            <p className="text-foreground text-sm sm:text-[15px] leading-relaxed mb-3">{creator.tagline}</p>
+
+            {/* Creator category badge */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">{creator.category}</span>
+              {creator.isLive && (
+                <span className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" /> Live Now
+                </span>
+              )}
+            </div>
 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-muted-foreground mb-4 sm:mb-5">
               <span className="flex items-center gap-1"><MapPin size={13} /> South Africa</span>
